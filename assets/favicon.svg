@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="treeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#228b22"/>
+      <stop offset="100%" style="stop-color:#1a472a"/>
+    </linearGradient>
+  </defs>
+  <polygon points="50,10 20,90 80,90" fill="url(#treeGrad)"/>
+  <rect x="42" y="85" width="16" height="15" fill="#8b4513"/>
+  <circle cx="50" cy="10" r="8" fill="#ffd700"/>
+  <circle cx="35" cy="40" r="4" fill="#c41e3a"/>
+  <circle cx="60" cy="55" r="4" fill="#ffd700"/>
+  <circle cx="45" cy="70" r="4" fill="#c41e3a"/>
+  <circle cx="55" cy="35" r="3" fill="#4169e1"/>
+</svg>

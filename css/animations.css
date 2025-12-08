@@ -1,0 +1,329 @@
+@keyframes btn-shine {
+    0% { left: -100%; }
+    20% { left: 100%; }
+    100% { left: 100%; }
+}
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toast-out {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes snowfall {
+    0% {
+        transform: translateY(-10px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0.3;
+    }
+}
+
+@keyframes sway {
+    0%, 100% {
+        transform: translateX(0) rotate(0deg);
+    }
+    25% {
+        transform: translateX(10px) rotate(5deg);
+    }
+    75% {
+        transform: translateX(-10px) rotate(-5deg);
+    }
+}
+
+@keyframes twinkle {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.4;
+        transform: scale(0.8);
+    }
+}
+
+@keyframes glow-pulse {
+    0%, 100% {
+        box-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+    }
+    50% {
+        box-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes bounce-in {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1) rotate(180deg);
+    }
+}
+
+@keyframes light-flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.snowflake {
+    position: absolute;
+    color: white;
+    font-size: 1rem;
+    user-select: none;
+    animation: snowfall linear infinite, sway ease-in-out infinite;
+    opacity: 0.8;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.christmas-light {
+    width: 12px;
+    height: 18px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    position: relative;
+    animation: twinkle 1.5s ease-in-out infinite;
+}
+
+.christmas-light::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background: #333;
+    border-radius: 2px;
+}
+
+.christmas-light.red { background: #ff4444; color: #ff4444; }
+.christmas-light.green { background: #44ff44; color: #44ff44; }
+.christmas-light.gold { background: #ffdd44; color: #ffdd44; }
+.christmas-light.blue { background: #4488ff; color: #4488ff; }
+
+.wire {
+    position: absolute;
+    top: 8px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #333;
+    z-index: -1;
+}
+
+.ornament-loader {
+    width: 40px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--color-red) 0%, var(--color-red-dark) 100%);
+    border-radius: 50%;
+    position: relative;
+    animation: float 2s ease-in-out infinite;
+    box-shadow: 0 0 20px rgba(196, 30, 58, 0.5);
+}
+
+.ornament-loader::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 12px;
+    background: var(--color-gold);
+    border-radius: 3px;
+}
+
+.ornament-loader::after {
+    content: '';
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 8px;
+    border: 2px solid var(--color-gold);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+}
+
+.tree-icon {
+    width: 60px;
+    height: 80px;
+    position: relative;
+    margin: 0 auto var(--spacing-md);
+}
+
+.tree-icon::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-bottom: 70px solid var(--color-green-bright);
+    filter: drop-shadow(0 0 10px rgba(34, 139, 34, 0.5));
+}
+
+.tree-icon::after {
+    content: '★';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-gold);
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px var(--color-gold);
+    animation: twinkle 2s ease-in-out infinite;
+}
+
+.reveal-decoration {
+    position: relative;
+    height: 40px;
+    margin-bottom: var(--spacing-md);
+}
+
+.reveal-decoration .sparkle {
+    position: absolute;
+    font-size: 1.5rem;
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+.reveal-decoration .sparkle:nth-child(1) {
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.reveal-decoration .sparkle:nth-child(2) {
+    left: 50%;
+    animation-delay: 0.5s;
+}
+
+.reveal-decoration .sparkle:nth-child(3) {
+    left: 80%;
+    animation-delay: 1s;
+}
+
+.animate-bounce-in {
+    animation: bounce-in 0.6s ease;
+}
+
+.animate-shake {
+    animation: shake 0.5s ease;
+}
+
+.animate-pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-slide-up {
+    animation: slide-up 0.4s ease;
+}
+
+.animate-fade-in {
+    animation: fade-in 0.3s ease;
+}
+
+.house-lit {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: var(--color-gold);
+    border-radius: 2px;
+    box-shadow: 0 0 10px var(--color-gold);
+}
+
+.house-dim {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: #666;
+    border-radius: 2px;
+}

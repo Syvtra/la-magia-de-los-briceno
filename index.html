@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a472a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>La Magia de los Briceño - Amigo Secreto</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Mountains+of+Christmas:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/screens.css">
+    <link rel="stylesheet" href="css/tutorial.css">
+</head>
+<body>
+    <div id="app">
+        <div id="snow-container"></div>
+        <div id="lights-container"></div>
+        
+        <main id="main-content">
+            <section id="screen-splash" class="screen active">
+                <div class="splash-content">
+                    <div class="splash-logo">
+                        <div class="tree-icon"></div>
+                        <h1>La Magia de los Briceño</h1>
+                        <p>Tu amigo secreto navideño</p>
+                    </div>
+                    <div class="splash-loader">
+                        <div class="ornament-loader"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-login" class="screen">
+                <div class="screen-scroll">
+                    <div class="auth-header">
+                        <div class="auth-decoration">
+                            <span class="star">★</span>
+                        </div>
+                        <h1>¡Bienvenido!</h1>
+                        <p>Inicia sesión para descubrir tu amigo secreto</p>
+                    </div>
+                    <form id="login-form" class="auth-form">
+                        <div class="input-group">
+                            <label for="login-email">Correo electrónico</label>
+                            <input type="email" id="login-email" placeholder="tu@correo.com" required>
+                            <span class="input-icon">✉</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="login-password">Contraseña</label>
+                            <input type="password" id="login-password" placeholder="••••••••" required>
+                            <span class="input-icon">🔒</span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <span>Entrar</span>
+                            <span class="btn-glow"></span>
+                        </button>
+                    </form>
+                    <div class="auth-footer">
+                        <p>¿No tienes cuenta?</p>
+                        <button class="btn-link" data-navigate="register">Crear cuenta</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-register" class="screen">
+                <div class="screen-scroll">
+                    <button class="btn-back" data-navigate="login">
+                        <span>←</span>
+                    </button>
+                    <div class="auth-header">
+                        <div class="auth-decoration">
+                            <span class="gift">🎁</span>
+                        </div>
+                        <h1>Únete a la fiesta</h1>
+                        <p>Crea tu cuenta y participa en el sorteo</p>
+                    </div>
+                    <form id="register-form" class="auth-form">
+                        <div class="input-group">
+                            <label for="register-name">Nombre completo</label>
+                            <input type="text" id="register-name" placeholder="María García" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="register-nickname">Apodo navideño</label>
+                            <input type="text" id="register-nickname" placeholder="Duende Alegre" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="register-email">Correo electrónico</label>
+                            <input type="email" id="register-email" placeholder="tu@correo.com" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="register-password">Contraseña</label>
+                            <input type="password" id="register-password" placeholder="Mínimo 6 caracteres" required minlength="6">
+                        </div>
+                        <div class="avatar-selector">
+                            <label>Elige tu avatar navideño</label>
+                            <div class="avatar-grid" id="avatar-grid">
+                                <button type="button" class="avatar-option selected" data-avatar="elf">🧝</button>
+                                <button type="button" class="avatar-option" data-avatar="santa">🎅</button>
+                                <button type="button" class="avatar-option" data-avatar="mrs-claus">🤶</button>
+                                <button type="button" class="avatar-option" data-avatar="snowman">⛄</button>
+                                <button type="button" class="avatar-option" data-avatar="reindeer">🦌</button>
+                                <button type="button" class="avatar-option" data-avatar="angel">👼</button>
+                                <button type="button" class="avatar-option" data-avatar="gingerbread">🍪</button>
+                                <button type="button" class="avatar-option" data-avatar="tree">🎄</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <span>Crear cuenta</span>
+                            <span class="btn-glow"></span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="screen-home" class="screen">
+                <div class="screen-scroll has-navbar">
+                    <header class="app-header">
+                        <div class="header-greeting">
+                            <span class="greeting-text">¡Feliz Navidad!</span>
+                            <h2 id="user-greeting">Hola, Usuario</h2>
+                        </div>
+                        <div class="header-actions">
+                            <button class="btn-icon" id="btn-notifications">
+                                <span>🔔</span>
+                                <span class="notification-badge hidden">0</span>
+                            </button>
+                            <div class="user-avatar" id="header-avatar">🧝</div>
+                        </div>
+                    </header>
+
+                    <div class="spirit-meter">
+                        <div class="spirit-header">
+                            <span class="spirit-icon">✨</span>
+                            <span class="spirit-title">Espíritu Navideño</span>
+                            <span class="spirit-level" id="spirit-level">0%</span>
+                        </div>
+                        <div class="spirit-bar">
+                            <div class="spirit-fill" id="spirit-fill"></div>
+                            <div class="spirit-glow"></div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <button class="action-card" data-action="view-assignment">
+                            <div class="action-icon">🎁</div>
+                            <div class="action-info">
+                                <h3>Mi Amigo Secreto</h3>
+                                <p>Descubre a quién regalar</p>
+                            </div>
+                            <span class="action-arrow">→</span>
+                        </button>
+                        <button class="action-card" data-action="secret-chat">
+                            <div class="action-icon">💬</div>
+                            <div class="action-info">
+                                <h3>Chat Secreto</h3>
+                                <p>Mensajes anónimos</p>
+                            </div>
+                            <span class="action-arrow">→</span>
+                        </button>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3>🗺️ Aldea Navideña</h3>
+                            <button class="btn-text" data-action="view-map">Ver todo</button>
+                        </div>
+                        <div class="village-preview" id="village-preview">
+                            <div class="village-houses"></div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3>📋 Mi Lista de Deseos</h3>
+                            <button class="btn-text" data-navigate="wishlist">Editar</button>
+                        </div>
+                        <div class="wishlist-preview" id="wishlist-preview">
+                            <p class="empty-state">Aún no has agregado deseos</p>
+                        </div>
+                    </div>
+
+                    <div class="section-card suggestions-card">
+                        <div class="section-header">
+                            <h3>💡 Sugerencias de Regalo</h3>
+                        </div>
+                        <div class="suggestions-list" id="suggestions-list">
+                            <p class="empty-state">Las sugerencias aparecerán cuando tengas asignado un amigo</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-sorteo" class="screen">
+                <div class="screen-scroll has-navbar">
+                    <header class="screen-header">
+                        <h1>🎲 Sorteo</h1>
+                    </header>
+
+                    <div class="sorteo-status" id="sorteo-status">
+                        <div class="status-icon pending">⏳</div>
+                        <h2>Sorteo Pendiente</h2>
+                        <p>El administrador aún no ha realizado el sorteo</p>
+                    </div>
+
+                    <div class="assignment-reveal hidden" id="assignment-reveal">
+                        <div class="reveal-card">
+                            <div class="reveal-decoration">
+                                <span class="sparkle">✨</span>
+                                <span class="sparkle">✨</span>
+                                <span class="sparkle">✨</span>
+                            </div>
+                            <h2>Tu Amigo Secreto es...</h2>
+                            <div class="reveal-avatar" id="reveal-avatar">🎁</div>
+                            <h3 class="reveal-name" id="reveal-name">???</h3>
+                            <p class="reveal-nickname" id="reveal-nickname"></p>
+                            <button class="btn btn-secondary" data-action="view-wishlist-friend">
+                                Ver su lista de deseos
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="participants-section">
+                        <h3>Participantes</h3>
+                        <div class="participants-grid" id="participants-grid">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-wishlist" class="screen">
+                <div class="screen-scroll has-navbar">
+                    <header class="screen-header">
+                        <h1>🎁 Lista de Deseos</h1>
+                    </header>
+
+                    <div class="wishlist-intro">
+                        <p>Agrega los regalos que te gustaría recibir para ayudar a tu amigo secreto</p>
+                    </div>
+
+                    <button class="btn btn-primary btn-block" id="btn-add-wish">
+                        <span>+ Agregar deseo</span>
+                    </button>
+
+                    <div class="wishlist-items" id="wishlist-items">
+                    </div>
+
+                    <div class="no-wish-section">
+                        <h3>🚫 Cosas que NO quiero</h3>
+                        <div class="no-wish-list" id="no-wish-list">
+                        </div>
+                        <button class="btn btn-outline btn-sm" id="btn-add-no-wish">
+                            + Agregar exclusión
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-profile" class="screen">
+                <div class="screen-scroll has-navbar">
+                    <header class="screen-header">
+                        <h1>👤 Mi Perfil</h1>
+                    </header>
+
+                    <div class="profile-card">
+                        <div class="profile-avatar" id="profile-avatar">🧝</div>
+                        <h2 class="profile-name" id="profile-name">Usuario</h2>
+                        <p class="profile-nickname" id="profile-nickname">@apodo</p>
+                        <p class="profile-email" id="profile-email">correo@ejemplo.com</p>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-wishes">0</span>
+                            <span class="stat-label">Deseos</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-messages">0</span>
+                            <span class="stat-label">Mensajes</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-spirit">0%</span>
+                            <span class="stat-label">Espíritu</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>Preferencias de Regalo</h3>
+                        <form id="preferences-form" class="preferences-form">
+                            <div class="input-group">
+                                <label for="pref-budget">Rango de precio preferido</label>
+                                <select id="pref-budget">
+                                    <option value="bajo">Hasta $500</option>
+                                    <option value="medio">$500 - $1,500</option>
+                                    <option value="alto">$1,500 - $3,000</option>
+                                    <option value="premium">Más de $3,000</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="pref-interests">Mis intereses</label>
+                                <textarea id="pref-interests" placeholder="Tecnología, libros, música..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                Guardar preferencias
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>Configuración</h3>
+                        <div class="settings-list">
+                            <div class="setting-item">
+                                <span class="setting-label">❄️ Copos de nieve</span>
+                                <label class="toggle">
+                                    <input type="checkbox" id="setting-snow" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">💡 Luces navideñas</span>
+                                <label class="toggle">
+                                    <input type="checkbox" id="setting-lights" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">🔊 Sonidos</span>
+                                <label class="toggle">
+                                    <input type="checkbox" id="setting-sounds" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">🔔 Notificaciones</span>
+                                <label class="toggle">
+                                    <input type="checkbox" id="setting-notifications">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-danger btn-block" id="btn-logout">
+                        Cerrar sesión
+                    </button>
+
+                    <button class="btn btn-admin hidden" id="btn-admin-panel" data-navigate="admin">
+                        🔧 Panel de Administración
+                    </button>
+                </div>
+            </section>
+
+            <section id="screen-chat" class="screen">
+                <div class="chat-container">
+                    <header class="chat-header">
+                        <button class="btn-back" data-navigate="home">←</button>
+                        <div class="chat-info">
+                            <div class="chat-avatar">🎅</div>
+                            <div class="chat-details">
+                                <h3>Duende Mensajero</h3>
+                                <span class="chat-status">Chat anónimo</span>
+                            </div>
+                        </div>
+                    </header>
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-empty">
+                            <span class="chat-empty-icon">💌</span>
+                            <p>Envía un mensaje anónimo a tu amigo secreto</p>
+                        </div>
+                    </div>
+                    <form class="chat-input-area" id="chat-form">
+                        <input type="text" id="chat-input" placeholder="Escribe como Duende Mensajero..." autocomplete="off">
+                        <button type="submit" class="btn-send">
+                            <span>📤</span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="screen-map" class="screen">
+                <div class="screen-scroll has-navbar">
+                    <header class="screen-header">
+                        <button class="btn-back" data-navigate="home">←</button>
+                        <h1>🗺️ Aldea Navideña</h1>
+                    </header>
+                    <div class="village-map" id="village-map">
+                        <div class="village-ground"></div>
+                        <div class="village-houses-full" id="village-houses-full"></div>
+                    </div>
+                    <div class="village-legend">
+                        <div class="legend-item">
+                            <span class="house-lit"></span>
+                            <span>Activo hoy</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="house-dim"></span>
+                            <span>Sin actividad</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-admin" class="screen">
+                <div class="screen-scroll">
+                    <header class="screen-header">
+                        <button class="btn-back" data-navigate="profile">←</button>
+                        <h1>🔧 Panel Admin</h1>
+                    </header>
+
+                    <div class="admin-section">
+                        <h3>👥 Usuarios</h3>
+                        <div class="admin-users-list" id="admin-users-list">
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h3>💑 Parejas (Exclusiones)</h3>
+                        <p class="admin-hint">Las parejas no pueden tocarse en el sorteo</p>
+                        <div class="pairs-list" id="pairs-list">
+                        </div>
+                        <button class="btn btn-outline btn-block" id="btn-add-pair">
+                            + Crear pareja
+                        </button>
+                    </div>
+
+                    <div class="admin-section">
+                        <h3>🎲 Sorteo</h3>
+                        <div class="sorteo-controls">
+                            <button class="btn btn-primary btn-block" id="btn-run-sorteo">
+                                🎄 Realizar Sorteo
+                            </button>
+                            <button class="btn btn-danger btn-block" id="btn-reset-sorteo">
+                                🔄 Reiniciar Sorteo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h3>🎨 Tema Visual</h3>
+                        <div class="theme-controls">
+                            <div class="setting-item">
+                                <span class="setting-label">❄️ Nieve global</span>
+                                <label class="toggle">
+                                    <input type="checkbox" id="admin-snow" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">💡 Luces globales</span>
+                                <label class="toggle">
+                                    <input type="checkbox" id="admin-lights" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <span class="setting-label">🎵 Sonidos globales</span>
+                                <label class="toggle">
+                                    <input type="checkbox" id="admin-sounds" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h3>📢 Notificaciones Push</h3>
+                        <form id="notification-form" class="notification-form">
+                            <div class="input-group">
+                                <label for="notif-title">Título</label>
+                                <input type="text" id="notif-title" placeholder="¡Atención!">
+                            </div>
+                            <div class="input-group">
+                                <label for="notif-message">Mensaje</label>
+                                <textarea id="notif-message" placeholder="El sorteo comienza mañana 🎄"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                📤 Enviar a todos
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-friend-wishlist" class="screen">
+                <div class="screen-scroll">
+                    <header class="screen-header">
+                        <button class="btn-back" data-navigate="sorteo">←</button>
+                        <h1>Lista de Deseos</h1>
+                    </header>
+                    <div class="friend-profile">
+                        <div class="friend-avatar" id="friend-avatar">🎁</div>
+                        <h2 id="friend-name">Amigo Secreto</h2>
+                        <p id="friend-nickname">@apodo</p>
+                    </div>
+                    <div class="friend-wishlist" id="friend-wishlist">
+                    </div>
+                    <div class="friend-no-wish">
+                        <h3>🚫 No quiere recibir:</h3>
+                        <div id="friend-no-wish-list"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav id="navbar" class="navbar hidden">
+            <button class="nav-item active" data-screen="home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Inicio</span>
+            </button>
+            <button class="nav-item" data-screen="sorteo">
+                <span class="nav-icon">🎲</span>
+                <span class="nav-label">Sorteo</span>
+            </button>
+            <button class="nav-item" data-screen="wishlist">
+                <span class="nav-icon">🎁</span>
+                <span class="nav-label">Deseos</span>
+            </button>
+            <button class="nav-item" data-screen="profile">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Perfil</span>
+            </button>
+        </nav>
+
+        <div id="modal-overlay" class="modal-overlay hidden">
+            <div class="modal" id="modal">
+                <button class="modal-close" id="modal-close">×</button>
+                <div class="modal-content" id="modal-content"></div>
+            </div>
+        </div>
+
+        <div id="toast-container"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/effects.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/wishlist.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/sorteo.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/tutorial.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
