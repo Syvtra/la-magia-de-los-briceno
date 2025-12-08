@@ -79,10 +79,17 @@ body {
     width: 100%;
     height: 100%;
     display: none;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     z-index: 100;
     background: var(--bg-primary);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+#screen-splash {
+    align-items: center;
     overflow: hidden;
 }
 
@@ -97,7 +104,18 @@ body {
     padding-top: var(--spacing-lg);
     padding-bottom: var(--spacing-md);
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    min-height: 100%;
+    width: 100%;
+}
+
+/* Asegurar scroll en WebViews de APKs */
+#screen-login .screen-scroll,
+#screen-register .screen-scroll {
+    padding-top: env(safe-area-inset-top, 20px);
+    padding-bottom: env(safe-area-inset-bottom, 40px);
+    min-height: auto;
 }
 
 .screen-scroll.has-navbar {
