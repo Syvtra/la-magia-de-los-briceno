@@ -28,20 +28,46 @@
     display: none !important;
 }
 
-/* Spotlight para resaltar elementos */
+/* Spotlight - crea un "agujero" en el overlay oscuro */
 .tutorial-spotlight {
     position: fixed;
-    border-radius: 12px;
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85);
+    border-radius: 16px;
     pointer-events: none;
     z-index: 10001;
-    border: 3px solid #ffd700;
+    border: 4px solid #ffd700;
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        0 0 0 4px #ffd700,
+        0 0 30px rgba(255, 215, 0, 0.8),
+        0 0 60px rgba(255, 215, 0, 0.4),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+    animation: spotlightGlow 1.5s ease-in-out infinite;
 }
 
-/* Elemento resaltado */
+@keyframes spotlightGlow {
+    0%, 100% {
+        box-shadow: 
+            0 0 0 4px #ffd700,
+            0 0 30px rgba(255, 215, 0, 0.8),
+            0 0 60px rgba(255, 215, 0, 0.4),
+            inset 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    50% {
+        box-shadow: 
+            0 0 0 6px #ffd700,
+            0 0 50px rgba(255, 215, 0, 1),
+            0 0 80px rgba(255, 215, 0, 0.6),
+            inset 0 0 30px rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* Elemento resaltado - visible sobre el fondo oscuro */
 .tutorial-highlighted {
-    position: relative;
-    z-index: 10002;
+    position: relative !important;
+    z-index: 10002 !important;
+    outline: 4px solid #ffd700 !important;
+    outline-offset: 4px !important;
+    box-shadow: 0 0 0 8px rgba(255, 215, 0, 0.4), 0 0 30px rgba(255, 215, 0, 0.6) !important;
 }
 
 /* Card del tutorial - valores fijos para compatibilidad */
@@ -196,10 +222,33 @@
     transform: scale(0.95);
 }
 
-/* Clases de posición - simplificadas */
-.tutorial-card-top,
-.tutorial-card-bottom {
-    position: relative;
+/* Flechas indicadoras hacia el elemento */
+.tutorial-card-bottom::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-bottom: 14px solid #ffffff;
+    filter: drop-shadow(0 -3px 3px rgba(0,0,0,0.15));
+}
+
+.tutorial-card-top::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-top: 14px solid #ffffff;
+    filter: drop-shadow(0 3px 3px rgba(0,0,0,0.15));
 }
 
 /* Animación de entrada */

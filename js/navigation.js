@@ -122,9 +122,6 @@ const Navigation = {
                 Sorteo.revealAssignment();
                 break;
             
-            case 'open-wrapped':
-                Wrapped.open();
-                break;
             
             case 'view-map':
                 this.showScreen('map');
@@ -179,7 +176,7 @@ const Navigation = {
             
             const assignment = await db.getAssignment(Auth.currentUser.id);
             if (assignment?.receiver) {
-                this.renderSuggestions(assignment.receiver);
+                await this.renderFriendWishlist(assignment.receiver);
             }
             
             Village.renderPreview();
@@ -210,29 +207,62 @@ const Navigation = {
         `).join('');
     },
     
-    renderSuggestions(receiver) {
+    async renderFriendWishlist(receiver) {
         const container = Utils.$('#suggestions-list');
         if (!container) return;
         
-        const interests = receiver.interests?.toLowerCase() || '';
-        const suggestions = CONFIG.GIFT_SUGGESTIONS.filter(s => {
-            return interests.includes(s.category) || Math.random() > 0.7;
-        }).slice(0, 3);
-        
-        if (suggestions.length === 0) {
-            container.innerHTML = '<p class="empty-state">Las sugerencias aparecerán cuando tengas asignado un amigo</p>';
-            return;
+        try {
+            // Obtener la lista de deseos y exclusiones del amigo secreto
+            const wishlist = await db.getWishlist(receiver.id);
+            const noWishList = await db.getNoWishList(receiver.id);
+            
+            const firstName = Utils.sanitizeHTML(receiver.name?.split(' ')[0] || 'Tu amigo');
+            
+            // Crear HTML con dos columnas
+            let html = `<div class="friend-lists-grid">`;
+            
+            // Columna: Lo que quiere
+            html += `<div class="friend-list-column wants">
+                <h4 class="column-title">✅ Quiere</h4>`;
+            
+            if (wishlist.length === 0) {
+                html += `<p class="empty-mini">Sin deseos aún</p>`;
+            } else {
+                const wants = wishlist.slice(0, 3);
+                html += wants.map(item => `
+                    <div class="friend-list-item want">
+                        <span>🎁</span>
+                        <span>${Utils.sanitizeHTML(item.item)}</span>
+                    </div>
+                `).join('');
+            }
+            html += `</div>`;
+            
+            // Columna: Lo que NO quiere
+            html += `<div class="friend-list-column no-wants">
+                <h4 class="column-title">❌ No quiere</h4>`;
+            
+            if (noWishList.length === 0) {
+                html += `<p class="empty-mini">Sin exclusiones</p>`;
+            } else {
+                const noWants = noWishList.slice(0, 3);
+                html += noWants.map(item => `
+                    <div class="friend-list-item no-want">
+                        <span>🚫</span>
+                        <span>${Utils.sanitizeHTML(item.item)}</span>
+                    </div>
+                `).join('');
+            }
+            html += `</div>`;
+            
+            html += `</div>`;
+            
+            container.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Error loading friend wishlist:', error);
+            container.innerHTML = '<p class="empty-state">Error al cargar la lista</p>';
         }
-        
-        container.innerHTML = suggestions.map(s => `
-            <div class="suggestion-item">
-                <span class="suggestion-icon">${s.icon}</span>
-                <div class="suggestion-info">
-                    <h4>${s.name}</h4>
-                    <p>Basado en sus intereses</p>
-                </div>
-            </div>
-        `).join('');
     },
     
     loadProfileData() {
@@ -252,26 +282,50 @@ const Navigation = {
     }
 };
 
-function initPreferencesForm() {
-    const form = Utils.$('#preferences-form');
-    if (!form) return;
+function initThemeSelector() {
+    const lightBtn = Utils.$('#theme-light');
+    const darkBtn = Utils.$('#theme-dark');
     
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const priceRange = Utils.$('#pref-budget').value;
-        const interests = Utils.$('#pref-interests').value;
-        
-        try {
-            await Auth.updateProfile({
-                price_range: priceRange,
-                interests: interests
-            });
-            showToast('Preferencias guardadas', 'success');
-        } catch (error) {
-            showToast('Error al guardar preferencias', 'error');
-        }
+    if (!lightBtn || !darkBtn) return;
+    
+    // Cargar tema guardado
+    const savedTheme = localStorage.getItem('app_theme') || 'light';
+    applyTheme(savedTheme);
+    
+    lightBtn.addEventListener('click', () => {
+        applyTheme('light');
+        localStorage.setItem('app_theme', 'light');
+        showToast('Tema claro activado', 'success');
     });
+    
+    darkBtn.addEventListener('click', () => {
+        applyTheme('dark');
+        localStorage.setItem('app_theme', 'dark');
+        showToast('Tema oscuro activado', 'success');
+    });
+}
+
+function applyTheme(theme) {
+    const lightBtn = Utils.$('#theme-light');
+    const darkBtn = Utils.$('#theme-dark');
+    
+    if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
+        if (lightBtn) lightBtn.classList.remove('active');
+        if (darkBtn) darkBtn.classList.add('active');
+    } else {
+        document.body.classList.remove('dark-theme');
+        if (lightBtn) lightBtn.classList.add('active');
+        if (darkBtn) darkBtn.classList.remove('active');
+    }
+}
+
+// Aplicar tema al cargar la página
+function loadSavedTheme() {
+    const savedTheme = localStorage.getItem('app_theme') || 'light';
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+    }
 }
 
 const Village = {

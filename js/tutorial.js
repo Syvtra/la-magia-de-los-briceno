@@ -29,13 +29,6 @@ const Tutorial = {
             highlight: '[data-action="view-assignment"]'
         },
         {
-            id: 'wrapped',
-            title: 'Family Wrapped 2025',
-            description: 'Descubre el resumen navideño de tu familia: momentos especiales, estadísticas y el espíritu navideño de todos.',
-            icon: '✨',
-            highlight: '[data-action="open-wrapped"]'
-        },
-        {
             id: 'wishlist',
             title: 'Lista de Deseos',
             description: 'Agrega los regalos que te gustaría recibir para ayudar a tu amigo secreto. También puedes indicar lo que NO quieres.',
@@ -333,10 +326,28 @@ const Tutorial = {
             localStorage.setItem(tutorialKey, 'true');
         }
         
-        // Remover highlights
+        // Remover highlights y limpiar estilos inline
         document.querySelectorAll('.tutorial-highlighted').forEach(el => {
             el.classList.remove('tutorial-highlighted');
         });
+        
+        // Forzar limpieza de cualquier elemento que pueda tener estilos residuales
+        var allElements = document.querySelectorAll('[style*="outline"], [style*="box-shadow"], [style*="z-index"]');
+        allElements.forEach(function(el) {
+            if (!el.classList.contains('tutorial-overlay') && !el.classList.contains('tutorial-card')) {
+                el.style.removeProperty('outline');
+                el.style.removeProperty('outline-offset');
+                el.style.removeProperty('box-shadow');
+                el.style.removeProperty('z-index');
+                el.style.removeProperty('position');
+            }
+        });
+        
+        // Ocultar spotlight
+        var spotlight = this.overlay.querySelector('.tutorial-spotlight');
+        if (spotlight) {
+            spotlight.style.display = 'none';
+        }
         
         try { Effects.playSound('reveal'); } catch(e) {}
         try { showToast('¡Tutorial completado! Disfruta la app', 'success'); } catch(e) {}

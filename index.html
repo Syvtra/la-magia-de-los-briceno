@@ -18,7 +18,6 @@
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/screens.css">
     <link rel="stylesheet" href="css/tutorial.css">
-    <link rel="stylesheet" href="css/wrapped.css">
 </head>
 <body>
     <div id="app">
@@ -158,14 +157,6 @@
                             </div>
                             <span class="action-arrow">→</span>
                         </button>
-                        <button class="action-card wrapped-card" data-action="open-wrapped">
-                            <div class="action-icon">✨</div>
-                            <div class="action-info">
-                                <h3>Family Wrapped 2025</h3>
-                                <p>Tu resumen navideño</p>
-                            </div>
-                            <span class="action-arrow">→</span>
-                        </button>
                     </div>
 
                     <div class="section-card">
@@ -190,10 +181,11 @@
 
                     <div class="section-card suggestions-card">
                         <div class="section-header">
-                            <h3>💡 Sugerencias de Regalo</h3>
+                            <h3>🎁 Lista de mi Amigo Secreto</h3>
+                            <button class="btn-text" data-action="view-wishlist-friend">Ver todo</button>
                         </div>
                         <div class="suggestions-list" id="suggestions-list">
-                            <p class="empty-state">Las sugerencias aparecerán cuando tengas asignado un amigo</p>
+                            <p class="empty-state">Aparecerá cuando tengas asignado un amigo</p>
                         </div>
                     </div>
                 </div>
@@ -293,25 +285,17 @@
                     </div>
 
                     <div class="profile-section">
-                        <h3>Preferencias de Regalo</h3>
-                        <form id="preferences-form" class="preferences-form">
-                            <div class="input-group">
-                                <label for="pref-budget">Rango de precio preferido</label>
-                                <select id="pref-budget">
-                                    <option value="bajo">Hasta $500</option>
-                                    <option value="medio">$500 - $1,500</option>
-                                    <option value="alto">$1,500 - $3,000</option>
-                                    <option value="premium">Más de $3,000</option>
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <label for="pref-interests">Mis intereses</label>
-                                <textarea id="pref-interests" placeholder="Tecnología, libros, música..."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">
-                                Guardar preferencias
+                        <h3>Apariencia</h3>
+                        <div class="theme-selector">
+                            <button class="theme-option" data-theme="light" id="theme-light">
+                                <span class="theme-icon">☀️</span>
+                                <span class="theme-label">Claro</span>
                             </button>
-                        </form>
+                            <button class="theme-option" data-theme="dark" id="theme-dark">
+                                <span class="theme-icon">🌙</span>
+                                <span class="theme-label">Oscuro</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="profile-section">
@@ -358,18 +342,6 @@
                 </div>
             </section>
 
-            <section id="screen-wrapped" class="screen wrapped-screen">
-                <div class="wrapped-container" id="wrapped-container">
-                    <!-- Slides se generan dinámicamente -->
-                </div>
-                <div class="wrapped-controls">
-                    <div class="wrapped-progress">
-                        <div class="wrapped-progress-bar" id="wrapped-progress-bar"></div>
-                    </div>
-                    <div class="wrapped-dots" id="wrapped-dots"></div>
-                </div>
-                <button class="wrapped-close" id="wrapped-close">×</button>
-            </section>
 
             <section id="screen-map" class="screen">
                 <div class="screen-scroll has-navbar">
@@ -533,7 +505,6 @@
     <script src="js/auth.js"></script>
     <script src="js/navigation.js"></script>
     <script src="js/wishlist.js"></script>
-    <script src="js/wrapped.js"></script>
     <script src="js/sorteo.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/notifications.js"></script>

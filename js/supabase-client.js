@@ -273,5 +273,38 @@ const db = {
                 table: 'app_settings'
             }, callback)
             .subscribe();
+    },
+    
+    subscribeToUsers(callback) {
+        return supabase
+            .channel('users-changes')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'users'
+            }, callback)
+            .subscribe();
+    },
+    
+    subscribeToWishlists(callback) {
+        return supabase
+            .channel('wishlist-changes')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'wishlists'
+            }, callback)
+            .subscribe();
+    },
+    
+    subscribeToPairs(callback) {
+        return supabase
+            .channel('pairs-changes')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'pairs'
+            }, callback)
+            .subscribe();
     }
 };

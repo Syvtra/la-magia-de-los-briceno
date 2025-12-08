@@ -106,16 +106,9 @@ const Sorteo = {
                     wishlistEl.innerHTML = wishlist.map(item => `
                         <div class="wish-item">
                             <div class="wish-item-header">
-                                <div class="wish-item-image">
-                                    ${item.image_url 
-                                        ? `<img src="${item.image_url}" alt="${Utils.sanitizeHTML(item.item)}">`
-                                        : '🎁'
-                                    }
-                                </div>
+                                <div class="wish-item-image">🎁</div>
                                 <div class="wish-item-info">
                                     <h4>${Utils.sanitizeHTML(item.item)}</h4>
-                                    ${item.description ? `<p>${Utils.sanitizeHTML(item.description)}</p>` : ''}
-                                    ${item.price_range ? `<span class="wish-item-price">${Utils.getPriceRangeLabel(item.price_range)}</span>` : ''}
                                 </div>
                             </div>
                         </div>

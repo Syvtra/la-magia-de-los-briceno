@@ -1,4 +1,4 @@
-const CACHE_NAME = 'magia-briceno-v2';
+const CACHE_NAME = 'magia-briceno-v3';
 const urlsToCache = [
     './',
     './index.html',
@@ -8,7 +8,6 @@ const urlsToCache = [
     './css/animations.css',
     './css/screens.css',
     './css/tutorial.css',
-    './css/wrapped.css',
     './js/config.js',
     './js/supabase-client.js',
     './js/utils.js',
@@ -16,7 +15,6 @@ const urlsToCache = [
     './js/auth.js',
     './js/navigation.js',
     './js/wishlist.js',
-    './js/wrapped.js',
     './js/sorteo.js',
     './js/admin.js',
     './js/notifications.js',

@@ -34,16 +34,9 @@ const Wishlist = {
         container.innerHTML = this.items.map(item => `
             <div class="wish-item animate-slide-up" data-wish-id="${item.id}">
                 <div class="wish-item-header">
-                    <div class="wish-item-image">
-                        ${item.image_url 
-                            ? `<img src="${item.image_url}" alt="${Utils.sanitizeHTML(item.item)}">`
-                            : '🎁'
-                        }
-                    </div>
+                    <div class="wish-item-image">🎁</div>
                     <div class="wish-item-info">
                         <h4>${Utils.sanitizeHTML(item.item)}</h4>
-                        ${item.description ? `<p>${Utils.sanitizeHTML(item.description)}</p>` : ''}
-                        ${item.price_range ? `<span class="wish-item-price">${Utils.getPriceRangeLabel(item.price_range)}</span>` : ''}
                     </div>
                     <div class="wish-item-actions">
                         <button class="btn-edit-wish" data-wish-id="${item.id}">✏️</button>
@@ -77,25 +70,7 @@ const Wishlist = {
             <form id="add-wish-form">
                 <div class="input-group">
                     <label for="wish-item">¿Qué te gustaría recibir?</label>
-                    <input type="text" id="wish-item" placeholder="Ej: Audífonos inalámbricos" required>
-                </div>
-                <div class="input-group">
-                    <label for="wish-description">Descripción (opcional)</label>
-                    <textarea id="wish-description" placeholder="Color, marca, modelo..."></textarea>
-                </div>
-                <div class="input-group">
-                    <label for="wish-price">Rango de precio</label>
-                    <select id="wish-price">
-                        <option value="">Sin especificar</option>
-                        <option value="bajo">Hasta $500</option>
-                        <option value="medio">$500 - $1,500</option>
-                        <option value="alto">$1,500 - $3,000</option>
-                        <option value="premium">Más de $3,000</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="wish-image">URL de imagen (opcional)</label>
-                    <input type="url" id="wish-image" placeholder="https://...">
+                    <input type="text" id="wish-item" placeholder="Ej: Audífonos, Perfume, Libro..." required>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">
                     Agregar a mi lista
@@ -123,24 +98,6 @@ const Wishlist = {
                     <label for="edit-wish-item">¿Qué te gustaría recibir?</label>
                     <input type="text" id="edit-wish-item" value="${Utils.sanitizeHTML(wish.item)}" required>
                 </div>
-                <div class="input-group">
-                    <label for="edit-wish-description">Descripción (opcional)</label>
-                    <textarea id="edit-wish-description">${Utils.sanitizeHTML(wish.description || '')}</textarea>
-                </div>
-                <div class="input-group">
-                    <label for="edit-wish-price">Rango de precio</label>
-                    <select id="edit-wish-price">
-                        <option value="" ${!wish.price_range ? 'selected' : ''}>Sin especificar</option>
-                        <option value="bajo" ${wish.price_range === 'bajo' ? 'selected' : ''}>Hasta $500</option>
-                        <option value="medio" ${wish.price_range === 'medio' ? 'selected' : ''}>$500 - $1,500</option>
-                        <option value="alto" ${wish.price_range === 'alto' ? 'selected' : ''}>$1,500 - $3,000</option>
-                        <option value="premium" ${wish.price_range === 'premium' ? 'selected' : ''}>Más de $3,000</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="edit-wish-image">URL de imagen (opcional)</label>
-                    <input type="url" id="edit-wish-image" value="${wish.image_url || ''}" placeholder="https://...">
-                </div>
                 <button type="submit" class="btn btn-primary btn-block">
                     Guardar cambios
                 </button>
@@ -158,9 +115,6 @@ const Wishlist = {
     
     async addWish() {
         const item = Utils.$('#wish-item').value.trim();
-        const description = Utils.$('#wish-description').value.trim();
-        const priceRange = Utils.$('#wish-price').value;
-        const imageUrl = Utils.$('#wish-image').value.trim();
         
         if (!item) {
             showToast('Escribe qué te gustaría recibir', 'error');
@@ -170,10 +124,7 @@ const Wishlist = {
         try {
             const newWish = await db.addWish({
                 user_id: Auth.currentUser.id,
-                item,
-                description: description || null,
-                price_range: priceRange || null,
-                image_url: imageUrl || null
+                item
             });
             
             this.items.unshift(newWish);
@@ -192,9 +143,6 @@ const Wishlist = {
     
     async updateWish(wishId) {
         const item = Utils.$('#edit-wish-item').value.trim();
-        const description = Utils.$('#edit-wish-description').value.trim();
-        const priceRange = Utils.$('#edit-wish-price').value;
-        const imageUrl = Utils.$('#edit-wish-image').value.trim();
         
         if (!item) {
             showToast('Escribe qué te gustaría recibir', 'error');
@@ -202,12 +150,7 @@ const Wishlist = {
         }
         
         try {
-            const updated = await db.updateWish(wishId, {
-                item,
-                description: description || null,
-                price_range: priceRange || null,
-                image_url: imageUrl || null
-            });
+            const updated = await db.updateWish(wishId, { item });
             
             const index = this.items.findIndex(w => w.id === wishId);
             if (index !== -1) {

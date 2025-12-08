@@ -85,6 +85,28 @@ const Auth = {
         this.currentUser = authData.user;
         
         // Esperar un momento para que el trigger cree el perfil
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Crear o actualizar el perfil directamente con upsert
+        try {
+            const { error } = await supabase.from('users').upsert({
+                id: this.currentUser.id,
+                name: name,
+                nickname: nickname,
+                avatar_url: avatar,
+                email: email,
+                spirit_points: 0,
+                is_admin: false
+            }, { onConflict: 'id' });
+            
+            if (error) {
+                console.log('Upsert error:', error);
+            }
+        } catch (e) {
+            console.log('Profile create error:', e);
+        }
+        
+        // Forzar recarga del perfil
         await new Promise(resolve => setTimeout(resolve, 500));
         
         await this.loadUserProfile();

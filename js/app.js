@@ -43,12 +43,15 @@ async function initApp() {
         initAuthForms();
         initWishlistEvents();
         initAdminEvents();
-        initPreferencesForm();
+        initThemeSelector();
         initEffectControls();
         initNotificationToggle();
     } catch (e) {
         console.error('Events init error:', e);
     }
+    
+    // Cargar tema guardado inmediatamente
+    loadSavedTheme();
     
     try {
         Navigation.init();
@@ -72,7 +75,7 @@ async function initApp() {
     }
     
     // Mostrar pantalla después del splash
-    setTimeout(() => {
+    setTimeout(async () => {
         try {
             if (isLoggedIn) {
                 Navigation.showScreen('home');
@@ -83,6 +86,9 @@ async function initApp() {
                     Tutorial.init();
                     addHelpButton();
                 }
+                
+                // Verificar si hay sorteo pendiente de mostrar
+                await checkPendingSorteo();
                 
             } else {
                 Navigation.showScreen('login');
@@ -124,20 +130,178 @@ async function loadGlobalSettings() {
 }
 
 function subscribeToRealtimeUpdates() {
-    db.subscribeToAssignments((payload) => {
-        if (payload.eventType === 'INSERT' || payload.eventType === 'DELETE') {
-            Sorteo.loadData();
+    // Suscribirse a cambios en asignaciones (sorteo)
+    db.subscribeToAssignments(async (payload) => {
+        console.log('Realtime: assignments changed', payload.eventType);
+        
+        // Verificar si es mi asignación
+        const isMyAssignment = payload.new && Auth.currentUser && payload.new.giver_id === Auth.currentUser.id;
+        
+        if (payload.eventType === 'INSERT' && isMyAssignment) {
+            // ¡Me tocó! Recargar datos y mostrar alerta especial
+            await Sorteo.loadData();
             
-            if (payload.eventType === 'INSERT') {
-                showToast('¡El sorteo se ha realizado!', 'info');
-                Effects.playSound('notification');
+            // Reproducir sonido festivo
+            Effects.playSound('reveal');
+            
+            // Mostrar alerta especial
+            showSorteoAlert();
+            
+            // Enviar notificación local
+            if (typeof Notifications !== 'undefined') {
+                Notifications.showLocalNotification(
+                    '🎄 ¡Sorteo realizado!',
+                    '¡Ya puedes ver quién es tu amigo secreto!',
+                    {
+                        tag: 'sorteo-realizado',
+                        onClick: () => {
+                            Navigation.showScreen('sorteo');
+                            Sorteo.revealAssignment();
+                        }
+                    }
+                );
             }
+        } else if (payload.eventType === 'INSERT') {
+            // Otro usuario recibió asignación, solo recargar
+            await Sorteo.loadData();
+        } else if (payload.eventType === 'DELETE') {
+            await Sorteo.loadData();
+            showToast('El sorteo ha sido reiniciado', 'info');
         }
     });
     
+    // Suscribirse a cambios en configuración global
     db.subscribeToSettings((payload) => {
+        console.log('Realtime: settings changed');
         if (payload.new) {
             Effects.applyGlobalSettings(payload.new);
+        }
+    });
+    
+    // Suscribirse a cambios en usuarios (nuevos registros, actualizaciones)
+    db.subscribeToUsers((payload) => {
+        console.log('Realtime: users changed', payload.eventType);
+        
+        // Si es mi propio perfil, actualizar UI
+        if (payload.new && Auth.currentUser && payload.new.id === Auth.currentUser.id) {
+            Auth.userProfile = payload.new;
+            Auth.updateUI();
+        }
+        
+        // Actualizar aldea y admin si está visible
+        if (typeof Village !== 'undefined') {
+            Village.loadUsers();
+        }
+        if (Auth.isAdmin() && typeof Admin !== 'undefined') {
+            Admin.loadData();
+        }
+    });
+    
+    // Suscribirse a cambios en wishlists
+    db.subscribeToWishlists((payload) => {
+        console.log('Realtime: wishlist changed', payload.eventType);
+        
+        // Si es mi wishlist, recargar
+        if (payload.new && Auth.currentUser && payload.new.user_id === Auth.currentUser.id) {
+            Wishlist.loadData();
+        }
+        // Si cambió la wishlist de mi amigo secreto, notificar
+        if (payload.new && Sorteo.assignment && payload.new.user_id === Sorteo.assignment.receiver_id) {
+            Sorteo.loadFriendWishlist();
+            showToast('Tu amigo secreto actualizó su lista', 'info');
+        }
+    });
+    
+    // Suscribirse a cambios en parejas (admin)
+    db.subscribeToPairs((payload) => {
+        console.log('Realtime: pairs changed', payload.eventType);
+        if (Auth.isAdmin() && typeof Admin !== 'undefined') {
+            Admin.loadData();
+        }
+    });
+}
+
+// Verificar si hay un sorteo pendiente de mostrar al entrar a la app
+async function checkPendingSorteo() {
+    if (!Auth.currentUser) return;
+    
+    try {
+        // Cargar datos del sorteo
+        await Sorteo.loadData();
+        
+        // Si hay asignación, verificar si ya la vio
+        if (Sorteo.assignment) {
+            const sorteoKey = `sorteo_seen_${Auth.currentUser.id}`;
+            const lastSeenSorteo = localStorage.getItem(sorteoKey);
+            
+            // Si no ha visto este sorteo, mostrar alerta
+            if (!lastSeenSorteo || lastSeenSorteo !== Sorteo.assignment.id) {
+                // Esperar un momento para que la UI se estabilice
+                setTimeout(() => {
+                    Effects.playSound('reveal');
+                    showSorteoAlert();
+                }, 500);
+            }
+        }
+    } catch (e) {
+        console.log('Error checking pending sorteo:', e);
+    }
+}
+
+// Alerta especial cuando se realiza el sorteo
+function showSorteoAlert() {
+    const alertHTML = `
+        <div id="sorteo-alert" class="sorteo-alert">
+            <div class="sorteo-alert-content">
+                <div class="sorteo-alert-icon">🎄</div>
+                <h2>¡Sorteo Realizado!</h2>
+                <p>Ya tienes asignado tu amigo secreto</p>
+                <button class="btn btn-primary" id="btn-ver-amigo">
+                    <span>Ver mi amigo secreto</span>
+                    <span class="btn-glow"></span>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Insertar alerta en el DOM
+    document.body.insertAdjacentHTML('beforeend', alertHTML);
+    
+    const alert = document.getElementById('sorteo-alert');
+    const btnVer = document.getElementById('btn-ver-amigo');
+    
+    // Animar entrada
+    setTimeout(() => {
+        alert.classList.add('active');
+    }, 100);
+    
+    // Marcar como visto
+    function markAsSeen() {
+        if (Auth.currentUser && Sorteo.assignment) {
+            const sorteoKey = `sorteo_seen_${Auth.currentUser.id}`;
+            localStorage.setItem(sorteoKey, Sorteo.assignment.id);
+        }
+    }
+    
+    // Click en botón
+    btnVer.addEventListener('click', () => {
+        markAsSeen();
+        alert.classList.remove('active');
+        setTimeout(() => {
+            alert.remove();
+        }, 300);
+        Navigation.showScreen('sorteo');
+        Sorteo.revealAssignment();
+    });
+    
+    // Click fuera cierra
+    alert.addEventListener('click', (e) => {
+        if (e.target === alert) {
+            markAsSeen();
+            alert.classList.remove('active');
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
         }
     });
 }

@@ -513,3 +513,229 @@
     font-weight: 500;
     color: var(--text-primary);
 }
+
+/* Alerta especial del sorteo */
+.sorteo-alert {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sorteo-alert.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sorteo-alert-content {
+    background: linear-gradient(135deg, #1a472a 0%, #0d2818 100%);
+    border-radius: 24px;
+    padding: 40px 32px;
+    text-align: center;
+    max-width: 340px;
+    width: 100%;
+    border: 3px solid var(--color-gold);
+    box-shadow: 0 0 60px rgba(255, 215, 0, 0.3), 0 20px 60px rgba(0, 0, 0, 0.5);
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+}
+
+.sorteo-alert.active .sorteo-alert-content {
+    transform: scale(1);
+    animation: sorteoAlertBounce 0.5s ease;
+}
+
+@keyframes sorteoAlertBounce {
+    0% { transform: scale(0.5); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.sorteo-alert-icon {
+    font-size: 80px;
+    margin-bottom: 16px;
+    animation: sorteoIconPulse 1s ease-in-out infinite;
+}
+
+@keyframes sorteoIconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.sorteo-alert-content h2 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    color: var(--color-gold);
+    margin-bottom: 12px;
+    text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+}
+
+.sorteo-alert-content p {
+    color: var(--text-light);
+    font-size: 16px;
+    margin-bottom: 24px;
+    opacity: 0.9;
+}
+
+.sorteo-alert-content .btn {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+}
+
+/* Grid de listas del amigo secreto (quiere / no quiere) */
+.friend-lists-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.friend-list-column {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.friend-list-column .column-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.friend-list-column.wants {
+    background: rgba(40, 167, 69, 0.08);
+}
+
+.friend-list-column.no-wants {
+    background: rgba(220, 53, 69, 0.08);
+}
+
+.friend-list-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.friend-list-item span:first-child {
+    font-size: 12px;
+}
+
+.friend-list-item.want {
+    color: #28a745;
+}
+
+.friend-list-item.no-want {
+    color: #dc3545;
+}
+
+.empty-mini {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+    padding: 4px 0;
+}
+
+/* Selector de tema claro/oscuro */
+.theme-selector {
+    display: flex;
+    gap: 12px;
+}
+
+.theme-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 12px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    background: var(--bg-card);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.theme-option:hover {
+    border-color: var(--color-gold);
+}
+
+.theme-option.active {
+    border-color: var(--color-gold);
+    background: rgba(255, 215, 0, 0.1);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+}
+
+.theme-icon {
+    font-size: 28px;
+}
+
+.theme-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Tema oscuro */
+body.dark-theme {
+    --bg-primary: linear-gradient(180deg, #0d1117 0%, #161b22 50%, #21262d 100%);
+    --bg-card: rgba(33, 38, 45, 0.95);
+    --bg-card-dark: rgba(13, 17, 23, 0.9);
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-light: #e6edf3;
+}
+
+body.dark-theme .screen-scroll {
+    background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+}
+
+body.dark-theme .section-card,
+body.dark-theme .profile-card,
+body.dark-theme .auth-form {
+    background: rgba(33, 38, 45, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .input-group input,
+body.dark-theme .input-group select,
+body.dark-theme .input-group textarea {
+    background: rgba(13, 17, 23, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #e6edf3;
+}
+
+body.dark-theme .wish-item,
+body.dark-theme .action-card {
+    background: rgba(33, 38, 45, 0.9);
+}
+
+body.dark-theme .theme-option {
+    background: rgba(33, 38, 45, 0.9);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .friend-list-column {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .friend-list-column.wants {
+    background: rgba(40, 167, 69, 0.15);
+}
+
+body.dark-theme .friend-list-column.no-wants {
+    background: rgba(220, 53, 69, 0.15);
+}
