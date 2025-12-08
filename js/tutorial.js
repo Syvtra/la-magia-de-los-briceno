@@ -134,14 +134,14 @@ const Tutorial = {
         this.overlay.classList.remove('hidden');
         this.overlay.classList.add('active');
         this.renderStep();
-        Effects.playSound('notification');
+        try { Effects.playSound('notification'); } catch(e) {}
     },
     
     next() {
         if (this.currentStep < this.steps.length - 1) {
             this.currentStep++;
             this.renderStep();
-            Effects.playSound('click');
+            try { Effects.playSound('click'); } catch(e) {}
         } else {
             this.end();
         }
@@ -300,8 +300,8 @@ const Tutorial = {
             el.classList.remove('tutorial-highlighted');
         });
         
-        Effects.playSound('reveal');
-        showToast('¡Tutorial completado! Disfruta la app', 'success');
+        try { Effects.playSound('reveal'); } catch(e) {}
+        try { showToast('¡Tutorial completado! Disfruta la app', 'success'); } catch(e) {}
     },
     
     // Reiniciar tutorial (para botón de ayuda)

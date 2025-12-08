@@ -1,9 +1,25 @@
 const Notifications = {
     subscription: null,
     
+    // Detectar si estamos en un WebView de APK
+    isWebView() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        return userAgent.includes('wv') || 
+               userAgent.includes('webview') ||
+               (userAgent.includes('android') && userAgent.includes('version/'));
+    },
+    
     async init() {
+        // En WebViews de APK, solo usar notificaciones locales simples
+        if (this.isWebView()) {
+            console.log('Running in WebView, using simple notifications');
+            await this.autoRequestPermission();
+            return;
+        }
+        
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
             console.log('Push notifications not supported');
+            await this.autoRequestPermission();
             return;
         }
         
@@ -23,6 +39,8 @@ const Notifications = {
             
         } catch (error) {
             console.error('Error initializing notifications:', error);
+            // Intentar al menos pedir permiso para notificaciones locales
+            await this.autoRequestPermission();
         }
     },
     

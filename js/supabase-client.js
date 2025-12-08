@@ -1,19 +1,36 @@
 let supabase = null;
 
 function initSupabase() {
+    if (typeof CONFIG === 'undefined') {
+        console.error('CONFIG not defined');
+        return null;
+    }
+    
     if (CONFIG.SUPABASE_URL === 'TU_SUPABASE_URL') {
         console.warn('Configura las credenciales de Supabase en js/config.js');
         return null;
     }
     
-    supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, {
-        auth: {
-            autoRefreshToken: true,
-            persistSession: true,
-            storage: window.localStorage
-        }
-    });
-    return supabase;
+    // Verificar que la librería de Supabase esté cargada
+    if (typeof window.supabase === 'undefined') {
+        console.error('Supabase library not loaded');
+        return null;
+    }
+    
+    try {
+        supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, {
+            auth: {
+                autoRefreshToken: true,
+                persistSession: true,
+                storage: window.localStorage
+            }
+        });
+        console.log('Supabase initialized successfully');
+        return supabase;
+    } catch (error) {
+        console.error('Error initializing Supabase:', error);
+        return null;
+    }
 }
 
 const db = {

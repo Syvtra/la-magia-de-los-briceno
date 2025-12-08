@@ -3,30 +3,38 @@ const Auth = {
     userProfile: null,
     
     async init() {
-        if (!supabase) return;
-        
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session) {
-            this.currentUser = session.user;
-            await this.loadUserProfile();
-            return true;
+        if (typeof supabase === 'undefined' || !supabase) {
+            console.error('Supabase not initialized');
+            return false;
         }
         
-        supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' && session) {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (session) {
                 this.currentUser = session.user;
                 await this.loadUserProfile();
-                Navigation.showScreen('home');
-                this.updateUI();
-            } else if (event === 'SIGNED_OUT') {
-                this.currentUser = null;
-                this.userProfile = null;
-                Navigation.showScreen('login');
+                return true;
             }
-        });
-        
-        return false;
+            
+            supabase.auth.onAuthStateChange(async (event, session) => {
+                if (event === 'SIGNED_IN' && session) {
+                    this.currentUser = session.user;
+                    await this.loadUserProfile();
+                    Navigation.showScreen('home');
+                    this.updateUI();
+                } else if (event === 'SIGNED_OUT') {
+                    this.currentUser = null;
+                    this.userProfile = null;
+                    Navigation.showScreen('login');
+                }
+            });
+            
+            return false;
+        } catch (error) {
+            console.error('Auth init error:', error);
+            return false;
+        }
     },
     
     async loadUserProfile() {
