@@ -13,34 +13,31 @@ const Notifications = {
         // En WebViews de APK, solo usar notificaciones locales simples
         if (this.isWebView()) {
             console.log('Running in WebView, using simple notifications');
-            await this.autoRequestPermission();
             return;
         }
         
-        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-            console.log('Push notifications not supported');
-            await this.autoRequestPermission();
+        // Si no hay soporte para notificaciones, salir silenciosamente
+        if (!('Notification' in window)) {
+            console.log('Notifications not supported');
             return;
         }
         
-        try {
-            const registration = await navigator.serviceWorker.register('./sw.js');
-            console.log('Service Worker registered');
-            
-            const existingSubscription = await registration.pushManager.getSubscription();
-            
-            if (existingSubscription) {
-                this.subscription = existingSubscription;
-                await this.saveSubscription(existingSubscription);
-            } else {
-                // Pedir permiso automáticamente si no se ha pedido antes
-                await this.autoRequestPermission();
+        // Intentar registrar Service Worker solo si está soportado
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            try {
+                const registration = await navigator.serviceWorker.register('./sw.js');
+                console.log('Service Worker registered');
+                
+                const existingSubscription = await registration.pushManager.getSubscription();
+                
+                if (existingSubscription) {
+                    this.subscription = existingSubscription;
+                    await this.saveSubscription(existingSubscription);
+                }
+            } catch (error) {
+                // Service Worker falló, pero podemos usar notificaciones locales
+                console.log('Service Worker not available, using local notifications only');
             }
-            
-        } catch (error) {
-            console.error('Error initializing notifications:', error);
-            // Intentar al menos pedir permiso para notificaciones locales
-            await this.autoRequestPermission();
         }
     },
     
@@ -175,14 +172,26 @@ function initNotificationToggle() {
     const toggle = Utils.$('#setting-notifications');
     if (!toggle) return;
     
+    // Verificar si las notificaciones están soportadas
+    if (!('Notification' in window)) {
+        toggle.disabled = true;
+        toggle.checked = false;
+        return;
+    }
+    
     // Marcar como checked si ya tiene permiso
     toggle.checked = Notification.permission === 'granted';
     
     toggle.addEventListener('change', async (e) => {
         if (e.target.checked) {
-            const granted = await Notifications.requestPermission();
-            if (!granted) {
+            try {
+                const granted = await Notifications.requestPermission();
+                if (!granted) {
+                    e.target.checked = false;
+                }
+            } catch (error) {
                 e.target.checked = false;
+                console.log('Error requesting notification permission');
             }
         }
     });

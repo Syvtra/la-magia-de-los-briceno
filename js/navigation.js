@@ -74,7 +74,6 @@ const Navigation = {
             const screenId = navItem.dataset.screen;
             if (screenId) {
                 this.showScreen(screenId);
-                Effects.playSound('click');
             }
         });
     },
@@ -87,7 +86,6 @@ const Navigation = {
             const screenId = navBtn.dataset.navigate;
             if (screenId) {
                 this.showScreen(screenId);
-                Effects.playSound('click');
             }
         });
         
@@ -101,7 +99,6 @@ const Navigation = {
             } else {
                 this.goBack();
             }
-            Effects.playSound('click');
         });
     },
     
@@ -135,8 +132,6 @@ const Navigation = {
             default:
                 console.log('Unknown action:', action);
         }
-        
-        try { Effects.playSound('click'); } catch(e) {}
     },
     
     onScreenChange(screenId) {

@@ -125,15 +125,78 @@ const Effects = {
         }
     },
     
+    lastSoundTime: 0,
+    
     playSound(soundName) {
         if (!this.settings.sounds) return;
         
+        // Evitar sonidos repetidos muy rápido (debounce 100ms)
+        const now = Date.now();
+        if (now - this.lastSoundTime < 100) return;
+        this.lastSoundTime = now;
+        
         try {
-            const audio = new Audio(CONFIG.SOUNDS[soundName]);
-            audio.volume = 0.3;
-            audio.play().catch(() => {});
+            // Crear contexto de audio si no existe
+            if (!this.audioContext) {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            const ctx = this.audioContext;
+            const time = ctx.currentTime;
+            
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            oscillator.type = 'sine';
+            
+            switch(soundName) {
+                case 'click':
+                    // Campanita muy suave
+                    oscillator.frequency.setValueAtTime(1200, time);
+                    gainNode.gain.setValueAtTime(0.04, time);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+                    oscillator.start(time);
+                    oscillator.stop(time + 0.06);
+                    break;
+                    
+                case 'success':
+                    oscillator.frequency.setValueAtTime(800, time);
+                    oscillator.frequency.setValueAtTime(1000, time + 0.08);
+                    gainNode.gain.setValueAtTime(0.05, time);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+                    oscillator.start(time);
+                    oscillator.stop(time + 0.2);
+                    break;
+                    
+                case 'notification':
+                    oscillator.frequency.setValueAtTime(900, time);
+                    gainNode.gain.setValueAtTime(0.05, time);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+                    oscillator.start(time);
+                    oscillator.stop(time + 0.1);
+                    break;
+                    
+                case 'reveal':
+                    oscillator.frequency.setValueAtTime(600, time);
+                    oscillator.frequency.setValueAtTime(800, time + 0.1);
+                    oscillator.frequency.setValueAtTime(1000, time + 0.2);
+                    gainNode.gain.setValueAtTime(0.06, time);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.35);
+                    oscillator.start(time);
+                    oscillator.stop(time + 0.35);
+                    break;
+                    
+                default:
+                    oscillator.frequency.setValueAtTime(1000, time);
+                    gainNode.gain.setValueAtTime(0.03, time);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+                    oscillator.start(time);
+                    oscillator.stop(time + 0.05);
+            }
         } catch (e) {
-            console.log('Sound not available');
+            // Silenciar errores
         }
     },
     
