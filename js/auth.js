@@ -200,6 +200,12 @@ function initAuthForms() {
                 await Auth.register(userData);
                 showToast('¡Cuenta creada exitosamente!', 'success');
                 Navigation.showScreen('home');
+                
+                // Mostrar tutorial para usuario nuevo
+                if (typeof Tutorial !== 'undefined') {
+                    Tutorial.showForNewUser();
+                    addHelpButton();
+                }
             } catch (error) {
                 showToast(error.message || 'Error al crear cuenta', 'error');
             } finally {

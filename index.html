@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/screens.css">
     <link rel="stylesheet" href="css/tutorial.css">
+    <link rel="stylesheet" href="css/wrapped.css">
 </head>
 <body>
     <div id="app">
@@ -89,7 +90,7 @@
                         </div>
                         <div class="input-group">
                             <label for="register-nickname">Apodo navideño</label>
-                            <input type="text" id="register-nickname" placeholder="Duende Alegre" required>
+                            <input type="text" id="register-nickname" placeholder="Cabeza de piñita" required>
                         </div>
                         <div class="input-group">
                             <label for="register-email">Correo electrónico</label>
@@ -157,11 +158,11 @@
                             </div>
                             <span class="action-arrow">→</span>
                         </button>
-                        <button class="action-card" data-action="secret-chat">
-                            <div class="action-icon">💬</div>
+                        <button class="action-card wrapped-card" data-action="open-wrapped">
+                            <div class="action-icon">✨</div>
                             <div class="action-info">
-                                <h3>Chat Secreto</h3>
-                                <p>Mensajes anónimos</p>
+                                <h3>Family Wrapped 2025</h3>
+                                <p>Tu resumen navideño</p>
                             </div>
                             <span class="action-arrow">→</span>
                         </button>
@@ -282,8 +283,8 @@
                             <span class="stat-label">Deseos</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-value" id="stat-messages">0</span>
-                            <span class="stat-label">Mensajes</span>
+                            <span class="stat-value" id="stat-days">0</span>
+                            <span class="stat-label">Días</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-value" id="stat-spirit">0%</span>
@@ -357,31 +358,17 @@
                 </div>
             </section>
 
-            <section id="screen-chat" class="screen">
-                <div class="chat-container">
-                    <header class="chat-header">
-                        <button class="btn-back" data-navigate="home">←</button>
-                        <div class="chat-info">
-                            <div class="chat-avatar">🎅</div>
-                            <div class="chat-details">
-                                <h3>Duende Mensajero</h3>
-                                <span class="chat-status">Chat anónimo</span>
-                            </div>
-                        </div>
-                    </header>
-                    <div class="chat-messages" id="chat-messages">
-                        <div class="chat-empty">
-                            <span class="chat-empty-icon">💌</span>
-                            <p>Envía un mensaje anónimo a tu amigo secreto</p>
-                        </div>
-                    </div>
-                    <form class="chat-input-area" id="chat-form">
-                        <input type="text" id="chat-input" placeholder="Escribe como Duende Mensajero..." autocomplete="off">
-                        <button type="submit" class="btn-send">
-                            <span>📤</span>
-                        </button>
-                    </form>
+            <section id="screen-wrapped" class="screen wrapped-screen">
+                <div class="wrapped-container" id="wrapped-container">
+                    <!-- Slides se generan dinámicamente -->
                 </div>
+                <div class="wrapped-controls">
+                    <div class="wrapped-progress">
+                        <div class="wrapped-progress-bar" id="wrapped-progress-bar"></div>
+                    </div>
+                    <div class="wrapped-dots" id="wrapped-dots"></div>
+                </div>
+                <button class="wrapped-close" id="wrapped-close">×</button>
             </section>
 
             <section id="screen-map" class="screen">
@@ -546,7 +533,7 @@
     <script src="js/auth.js"></script>
     <script src="js/navigation.js"></script>
     <script src="js/wishlist.js"></script>
-    <script src="js/chat.js"></script>
+    <script src="js/wrapped.js"></script>
     <script src="js/sorteo.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/notifications.js"></script>

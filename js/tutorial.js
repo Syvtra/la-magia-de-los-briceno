@@ -29,11 +29,11 @@ const Tutorial = {
             highlight: '[data-action="view-assignment"]'
         },
         {
-            id: 'chat',
-            title: 'Chat Secreto',
-            description: 'Envía mensajes anónimos a tu amigo secreto como "Duende Mensajero". Puedes darle pistas o preguntarle cosas sin revelar tu identidad.',
-            icon: '💬',
-            highlight: '[data-action="secret-chat"]'
+            id: 'wrapped',
+            title: 'Family Wrapped 2025',
+            description: 'Descubre el resumen navideño de tu familia: momentos especiales, estadísticas y el espíritu navideño de todos.',
+            icon: '✨',
+            highlight: '[data-action="open-wrapped"]'
         },
         {
             id: 'wishlist',
@@ -122,13 +122,47 @@ const Tutorial = {
     },
     
     checkFirstVisit() {
-        const hasSeenTutorial = localStorage.getItem('navidad_tutorial_seen');
-        if (!hasSeenTutorial && Auth.currentUser) {
+        if (!Auth.currentUser) return;
+        
+        // Clave única por usuario
+        const tutorialKey = `tutorial_seen_${Auth.currentUser.id}`;
+        const hasSeenTutorial = localStorage.getItem(tutorialKey);
+        
+        if (!hasSeenTutorial) {
             setTimeout(() => this.start(), 1000);
         }
     },
     
+    // Llamar después del registro para mostrar tutorial inmediatamente
+    showForNewUser() {
+        if (!Auth.currentUser) return;
+        
+        // Asegurar que el overlay esté creado
+        if (!this.overlay) {
+            this.createOverlay();
+        }
+        
+        // Asegurar que no esté marcado como visto
+        const tutorialKey = `tutorial_seen_${Auth.currentUser.id}`;
+        localStorage.removeItem(tutorialKey);
+        
+        // Iniciar tutorial después de un breve delay para que la UI se estabilice
+        setTimeout(() => {
+            this.start();
+        }, 800);
+    },
+    
     start() {
+        // Asegurar que el overlay existe
+        if (!this.overlay) {
+            this.createOverlay();
+        }
+        
+        if (!this.overlay) {
+            console.error('Tutorial: No se pudo crear el overlay');
+            return;
+        }
+        
         this.isActive = true;
         this.currentStep = 0;
         this.overlay.classList.remove('hidden');
@@ -202,12 +236,13 @@ const Tutorial = {
     },
     
     highlightElement(selector, card) {
-        const spotlight = this.overlay.querySelector('.tutorial-spotlight');
+        var spotlight = this.overlay.querySelector('.tutorial-spotlight');
         
         // Remover highlight anterior
-        document.querySelectorAll('.tutorial-highlighted').forEach(el => {
-            el.classList.remove('tutorial-highlighted');
-        });
+        var highlighted = document.querySelectorAll('.tutorial-highlighted');
+        for (var i = 0; i < highlighted.length; i++) {
+            highlighted[i].classList.remove('tutorial-highlighted');
+        }
         
         // Reset card position
         card.style.position = '';
@@ -222,7 +257,7 @@ const Tutorial = {
             return;
         }
         
-        const element = document.querySelector(selector);
+        var element = document.querySelector(selector);
         if (!element) {
             spotlight.style.display = 'none';
             return;
@@ -230,58 +265,57 @@ const Tutorial = {
         
         element.classList.add('tutorial-highlighted');
         
-        const rect = element.getBoundingClientRect();
-        const padding = 10;
+        // Obtener posición del elemento
+        var rect = element.getBoundingClientRect();
+        var padding = 8;
         
+        // Mostrar spotlight alrededor del elemento
         spotlight.style.display = 'block';
-        spotlight.style.top = `${rect.top - padding}px`;
-        spotlight.style.left = `${rect.left - padding}px`;
-        spotlight.style.width = `${rect.width + padding * 2}px`;
-        spotlight.style.height = `${rect.height + padding * 2}px`;
+        spotlight.style.top = (rect.top - padding) + 'px';
+        spotlight.style.left = (rect.left - padding) + 'px';
+        spotlight.style.width = (rect.width + padding * 2) + 'px';
+        spotlight.style.height = (rect.height + padding * 2) + 'px';
         
         // Posicionar el card para que no tape el elemento
         this.positionCard(card, rect);
     },
     
     positionCard(card, elementRect) {
-        const windowHeight = window.innerHeight;
-        const windowWidth = window.innerWidth;
-        const cardHeight = 380; // Altura aproximada del card
-        const cardWidth = Math.min(360, windowWidth - 32);
-        const margin = 20;
+        var windowHeight = window.innerHeight;
+        var windowWidth = window.innerWidth;
+        var cardHeight = 350;
+        var cardWidth = Math.min(340, windowWidth - 40);
+        var margin = 16;
         
         // Calcular espacio disponible arriba y abajo del elemento
-        const spaceAbove = elementRect.top;
-        const spaceBelow = windowHeight - elementRect.bottom;
+        var spaceAbove = elementRect.top;
+        var spaceBelow = windowHeight - elementRect.bottom;
         
+        // Posicionar card con valores fijos (mejor compatibilidad)
         card.style.position = 'fixed';
         card.style.left = '50%';
         card.style.transform = 'translateX(-50%)';
-        card.style.maxWidth = `${cardWidth}px`;
+        card.style.maxWidth = cardWidth + 'px';
+        card.style.margin = '0';
         
-        // Si hay más espacio abajo, poner el card abajo
-        if (spaceBelow > cardHeight + margin || spaceBelow > spaceAbove) {
-            card.style.top = `${Math.min(elementRect.bottom + margin, windowHeight - cardHeight - margin)}px`;
+        // Si hay más espacio abajo, poner el card abajo del elemento
+        if (spaceBelow >= cardHeight + margin || spaceBelow > spaceAbove) {
+            var topPos = elementRect.bottom + margin;
+            if (topPos + cardHeight > windowHeight - margin) {
+                topPos = windowHeight - cardHeight - margin;
+            }
+            card.style.top = topPos + 'px';
             card.style.bottom = 'auto';
             card.classList.add('tutorial-card-bottom');
         } else {
-            // Si hay más espacio arriba, poner el card arriba
-            card.style.top = 'auto';
-            card.style.bottom = `${Math.min(windowHeight - elementRect.top + margin, windowHeight - margin)}px`;
-            card.classList.add('tutorial-card-top');
-        }
-        
-        // Si el elemento está muy centrado, centrar el card verticalmente
-        const elementCenter = elementRect.top + elementRect.height / 2;
-        if (elementCenter > windowHeight * 0.35 && elementCenter < windowHeight * 0.65) {
-            // Elemento en el centro, poner card arriba o abajo según espacio
-            if (spaceAbove > spaceBelow) {
-                card.style.top = `${margin}px`;
-                card.style.bottom = 'auto';
-            } else {
-                card.style.top = 'auto';
-                card.style.bottom = `${margin}px`;
+            // Poner el card arriba del elemento
+            var bottomPos = windowHeight - elementRect.top + margin;
+            if (bottomPos + cardHeight > windowHeight - margin) {
+                bottomPos = margin;
             }
+            card.style.top = 'auto';
+            card.style.bottom = bottomPos + 'px';
+            card.classList.add('tutorial-card-top');
         }
     },
     
@@ -293,7 +327,11 @@ const Tutorial = {
             this.overlay.classList.add('hidden');
         }, 300);
         
-        localStorage.setItem('navidad_tutorial_seen', 'true');
+        // Guardar por usuario
+        if (Auth.currentUser) {
+            const tutorialKey = `tutorial_seen_${Auth.currentUser.id}`;
+            localStorage.setItem(tutorialKey, 'true');
+        }
         
         // Remover highlights
         document.querySelectorAll('.tutorial-highlighted').forEach(el => {
@@ -306,7 +344,6 @@ const Tutorial = {
     
     // Reiniciar tutorial (para botón de ayuda)
     restart() {
-        localStorage.removeItem('navidad_tutorial_seen');
         this.start();
     }
 };

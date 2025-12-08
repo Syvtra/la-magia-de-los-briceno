@@ -158,26 +158,16 @@ const Notifications = {
         return null;
     },
     
-    // Notificación específica para mensajes de chat
-    notifyNewMessage(senderName = 'Duende Mensajero') {
-        // Solo notificar si la ventana no está enfocada
+    // Notificación general
+    notifyGeneral(title, body) {
         if (document.hasFocus()) return;
         
-        this.showLocalNotification(
-            '💬 Nuevo mensaje secreto',
-            `${senderName} te ha enviado un mensaje`,
-            {
-                tag: 'chat-message',
-                icon: './assets/icon-192.png',
-                onClick: () => {
-                    Navigation.showScreen('chat');
-                    Chat.init();
-                }
-            }
-        );
+        this.showLocalNotification(title, body, {
+            tag: 'general',
+            icon: './assets/icon-192.png'
+        });
         
-        // También reproducir sonido
-        Effects.playSound('notification');
+        try { Effects.playSound('notification'); } catch(e) {}
     }
 };
 
@@ -193,20 +183,6 @@ function initNotificationToggle() {
             const granted = await Notifications.requestPermission();
             if (!granted) {
                 e.target.checked = false;
-            }
-        }
-    });
-}
-
-// Suscribirse a mensajes de chat en tiempo real para notificaciones
-function subscribeToMessageNotifications() {
-    if (!Auth.currentUser) return;
-    
-    db.subscribeToMessages(Auth.currentUser.id, (payload) => {
-        if (payload.new) {
-            // Notificar solo si el mensaje es para mí (no enviado por mí)
-            if (payload.new.receiver_id === Auth.currentUser.id) {
-                Notifications.notifyNewMessage();
             }
         }
     });

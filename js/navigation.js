@@ -122,9 +122,8 @@ const Navigation = {
                 Sorteo.revealAssignment();
                 break;
             
-            case 'secret-chat':
-                this.showScreen('chat');
-                Chat.init();
+            case 'open-wrapped':
+                Wrapped.open();
                 break;
             
             case 'view-map':
@@ -140,7 +139,7 @@ const Navigation = {
                 console.log('Unknown action:', action);
         }
         
-        Effects.playSound('click');
+        try { Effects.playSound('click'); } catch(e) {}
     },
     
     onScreenChange(screenId) {

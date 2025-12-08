@@ -42,7 +42,6 @@ async function initApp() {
         initModalEvents();
         initAuthForms();
         initWishlistEvents();
-        initChatEvents();
         initAdminEvents();
         initPreferencesForm();
         initEffectControls();
@@ -85,10 +84,6 @@ async function initApp() {
                     addHelpButton();
                 }
                 
-                // Suscribirse a notificaciones de mensajes
-                if (typeof subscribeToMessageNotifications === 'function') {
-                    subscribeToMessageNotifications();
-                }
             } else {
                 Navigation.showScreen('login');
             }
@@ -170,9 +165,7 @@ async function updateLastActive() {
 }
 
 window.addEventListener('beforeunload', () => {
-    try {
-        Chat.cleanup();
-    } catch (e) {}
+    // Cleanup si es necesario
 });
 
 // Service Worker - desactivado para APKs (puede causar problemas)

@@ -215,28 +215,6 @@ const db = {
         if (error) throw error;
     },
     
-    async getMessages(userId, friendId) {
-        const { data, error } = await supabase
-            .from('chat')
-            .select('*')
-            .or(`and(sender_id.eq.${userId},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${userId})`)
-            .order('created_at', { ascending: true });
-        
-        if (error) throw error;
-        return data;
-    },
-    
-    async sendMessage(message) {
-        const { data, error } = await supabase
-            .from('chat')
-            .insert(message)
-            .select()
-            .single();
-        
-        if (error) throw error;
-        return data;
-    },
-    
     async getSettings() {
         const { data, error } = await supabase
             .from('app_settings')
@@ -273,18 +251,6 @@ const db = {
             if (error) throw error;
             return data;
         }
-    },
-    
-    subscribeToMessages(userId, callback) {
-        return supabase
-            .channel('chat-changes')
-            .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'chat',
-                filter: `receiver_id=eq.${userId}`
-            }, callback)
-            .subscribe();
     },
     
     subscribeToAssignments(callback) {
