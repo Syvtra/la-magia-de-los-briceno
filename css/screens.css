@@ -416,6 +416,16 @@
     text-overflow: ellipsis;
 }
 
+.participant-nickname {
+    font-size: 0.65rem;
+    color: var(--color-gold-dark);
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+}
+
 .wishlist-intro {
     background: var(--bg-card);
     border-radius: var(--radius-lg);
