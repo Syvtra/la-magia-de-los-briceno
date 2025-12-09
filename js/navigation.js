@@ -324,6 +324,12 @@ function loadSavedTheme() {
 }
 
 const Village = {
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    scrollLeft: 0,
+    scrollTop: 0,
+    
     async renderPreview() {
         const container = Utils.$('.village-houses');
         if (!container) return;
@@ -361,9 +367,90 @@ const Village = {
                     </div>
                 `;
             }).join('');
+            
+            // Inicializar arrastre después de renderizar
+            this.initDrag();
+            
         } catch (error) {
             console.error('Error rendering village:', error);
         }
+    },
+    
+    initDrag() {
+        const map = Utils.$('#village-map');
+        const content = Utils.$('#village-map-content');
+        if (!map || !content) return;
+        
+        // Resetear posición
+        content.style.left = '0px';
+        content.style.top = '0px';
+        
+        // Mouse events
+        map.addEventListener('mousedown', (e) => this.startDrag(e));
+        document.addEventListener('mousemove', (e) => this.drag(e));
+        document.addEventListener('mouseup', () => this.endDrag());
+        
+        // Touch events
+        map.addEventListener('touchstart', (e) => this.startDrag(e), { passive: false });
+        document.addEventListener('touchmove', (e) => this.drag(e), { passive: false });
+        document.addEventListener('touchend', () => this.endDrag());
+    },
+    
+    startDrag(e) {
+        const map = Utils.$('#village-map');
+        const content = Utils.$('#village-map-content');
+        if (!map || !content) return;
+        
+        this.isDragging = true;
+        
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        this.startX = clientX;
+        this.startY = clientY;
+        this.scrollLeft = parseInt(content.style.left) || 0;
+        this.scrollTop = parseInt(content.style.top) || 0;
+        
+        if (e.preventDefault) e.preventDefault();
+    },
+    
+    drag(e) {
+        if (!this.isDragging) return;
+        
+        const map = Utils.$('#village-map');
+        const content = Utils.$('#village-map-content');
+        if (!map || !content) return;
+        
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        const deltaX = clientX - this.startX;
+        const deltaY = clientY - this.startY;
+        
+        let newLeft = this.scrollLeft + deltaX;
+        let newTop = this.scrollTop + deltaY;
+        
+        // Calcular límites
+        const mapRect = map.getBoundingClientRect();
+        const contentRect = content.getBoundingClientRect();
+        
+        const maxLeft = 50; // Margen de límite
+        const minLeft = mapRect.width - contentRect.width - 50;
+        const maxTop = 50;
+        const minTop = mapRect.height - contentRect.height - 50;
+        
+        // Aplicar límites
+        newLeft = Math.min(maxLeft, Math.max(minLeft, newLeft));
+        newTop = Math.min(maxTop, Math.max(minTop, newTop));
+        
+        content.style.left = newLeft + 'px';
+        content.style.top = newTop + 'px';
+        
+        if (e.preventDefault) e.preventDefault();
+    },
+    
+    endDrag() {
+        this.isDragging = false;
     },
     
     isUserActive(user) {
