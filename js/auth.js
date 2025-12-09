@@ -261,6 +261,82 @@ function initAuthForms() {
             }
         });
     }
+    
+    // Avatar change functionality
+    initAvatarSelector();
+}
+
+function initAvatarSelector() {
+    const btnChangeAvatar = Utils.$('#btn-change-avatar');
+    const avatarModal = Utils.$('#avatar-selector-modal');
+    const avatarGrid = Utils.$('#avatar-grid-profile');
+    const btnCancelAvatar = Utils.$('#btn-cancel-avatar');
+    
+    if (!btnChangeAvatar || !avatarModal || !avatarGrid) return;
+    
+    // Abrir modal
+    btnChangeAvatar.addEventListener('click', () => {
+        // Marcar el avatar actual como seleccionado
+        const currentAvatar = Auth.userProfile?.avatar_url || 'elf';
+        Utils.$$('#avatar-grid-profile .avatar-option').forEach(opt => {
+            opt.classList.toggle('selected', opt.dataset.avatar === currentAvatar);
+        });
+        avatarModal.classList.remove('hidden');
+    });
+    
+    // Cerrar modal
+    if (btnCancelAvatar) {
+        btnCancelAvatar.addEventListener('click', () => {
+            avatarModal.classList.add('hidden');
+        });
+    }
+    
+    // Cerrar al hacer click fuera
+    avatarModal.addEventListener('click', (e) => {
+        if (e.target === avatarModal) {
+            avatarModal.classList.add('hidden');
+        }
+    });
+    
+    // Seleccionar y guardar avatar
+    avatarGrid.addEventListener('click', async (e) => {
+        const option = e.target.closest('.avatar-option');
+        if (!option) return;
+        
+        const newAvatar = option.dataset.avatar;
+        
+        // Actualizar selección visual
+        Utils.$$('#avatar-grid-profile .avatar-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        option.classList.add('selected');
+        
+        // Guardar en la base de datos
+        try {
+            await db.updateUser(Auth.currentUser.id, { avatar_url: newAvatar });
+            Auth.userProfile.avatar_url = newAvatar;
+            
+            // Actualizar UI en todas partes
+            const avatarEmoji = Utils.getAvatarEmoji(newAvatar);
+            
+            const profileAvatar = Utils.$('#profile-avatar');
+            const headerAvatar = Utils.$('#header-avatar');
+            
+            if (profileAvatar) profileAvatar.textContent = avatarEmoji;
+            if (headerAvatar) headerAvatar.textContent = avatarEmoji;
+            
+            avatarModal.classList.add('hidden');
+            showToast('¡Avatar actualizado!', 'success');
+            
+            // Agregar puntos de espíritu
+            if (typeof Spirit !== 'undefined') {
+                Spirit.addPoints('updateProfile');
+            }
+        } catch (error) {
+            console.error('Error updating avatar:', error);
+            showToast('Error al actualizar avatar', 'error');
+        }
+    });
 }
 
 const Spirit = {

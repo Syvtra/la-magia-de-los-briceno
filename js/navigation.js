@@ -357,20 +357,19 @@ const Village = {
             container.innerHTML = users.map(user => {
                 const avatar = Utils.getAvatarEmoji(user.avatar_url);
                 const isActive = this.isUserActive(user);
-                const firstName = user.name?.split(' ')[0] || 'Usuario';
+                const shortName = Utils.getShortName(user.name);
                 
                 return `
                     <div class="village-house" data-user-id="${user.id}">
                         <div class="house-structure ${isActive ? 'lit' : ''}"></div>
                         <div class="house-elf">${avatar}</div>
-                        <div class="house-name">${Utils.sanitizeHTML(firstName)}</div>
+                        <div class="house-name">${Utils.sanitizeHTML(shortName)}</div>
                     </div>
                 `;
             }).join('');
             
-            // Inicializar arrastre después de renderizar
+            // Inicializar drag después de renderizar
             this.initDrag();
-            
         } catch (error) {
             console.error('Error rendering village:', error);
         }
@@ -381,76 +380,77 @@ const Village = {
         const content = Utils.$('#village-map-content');
         if (!map || !content) return;
         
-        // Resetear posición
-        content.style.left = '0px';
-        content.style.top = '0px';
+        // Resetear posición inicial (centrado con el transform base)
+        this.scrollLeft = 0;
+        this.scrollTop = 0;
+        content.style.transform = 'translate(-50%, -50%)';
+        
+        // Límites de movimiento (margen para no mover demasiado)
+        const maxOffset = 100; // píxeles máximos de movimiento
+        
+        const startDrag = (e) => {
+            this.isDragging = true;
+            map.style.cursor = 'grabbing';
+            
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            
+            this.startX = clientX;
+            this.startY = clientY;
+        };
+        
+        const doDrag = (e) => {
+            if (!this.isDragging) return;
+            e.preventDefault();
+            
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            
+            const deltaX = clientX - this.startX;
+            const deltaY = clientY - this.startY;
+            
+            // Calcular nueva posición con límites
+            let newX = this.scrollLeft + deltaX;
+            let newY = this.scrollTop + deltaY;
+            
+            // Aplicar límites (margen)
+            newX = Math.max(-maxOffset, Math.min(maxOffset, newX));
+            newY = Math.max(-maxOffset, Math.min(maxOffset, newY));
+            
+            content.style.transform = `translate(calc(-50% + ${newX}px), calc(-50% + ${newY}px))`;
+        };
+        
+        const endDrag = (e) => {
+            if (!this.isDragging) return;
+            this.isDragging = false;
+            map.style.cursor = 'grab';
+            
+            const clientX = e.type.includes('touch') ? 
+                (e.changedTouches ? e.changedTouches[0].clientX : this.startX) : e.clientX;
+            const clientY = e.type.includes('touch') ? 
+                (e.changedTouches ? e.changedTouches[0].clientY : this.startY) : e.clientY;
+            
+            const deltaX = clientX - this.startX;
+            const deltaY = clientY - this.startY;
+            
+            // Actualizar posición guardada con límites
+            this.scrollLeft = Math.max(-maxOffset, Math.min(maxOffset, this.scrollLeft + deltaX));
+            this.scrollTop = Math.max(-maxOffset, Math.min(maxOffset, this.scrollTop + deltaY));
+        };
+        
+        // Remover listeners previos si existen
+        map.removeEventListener('mousedown', startDrag);
+        map.removeEventListener('touchstart', startDrag);
         
         // Mouse events
-        map.addEventListener('mousedown', (e) => this.startDrag(e));
-        document.addEventListener('mousemove', (e) => this.drag(e));
-        document.addEventListener('mouseup', () => this.endDrag());
+        map.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', doDrag);
+        document.addEventListener('mouseup', endDrag);
         
         // Touch events
-        map.addEventListener('touchstart', (e) => this.startDrag(e), { passive: false });
-        document.addEventListener('touchmove', (e) => this.drag(e), { passive: false });
-        document.addEventListener('touchend', () => this.endDrag());
-    },
-    
-    startDrag(e) {
-        const map = Utils.$('#village-map');
-        const content = Utils.$('#village-map-content');
-        if (!map || !content) return;
-        
-        this.isDragging = true;
-        
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        this.startX = clientX;
-        this.startY = clientY;
-        this.scrollLeft = parseInt(content.style.left) || 0;
-        this.scrollTop = parseInt(content.style.top) || 0;
-        
-        if (e.preventDefault) e.preventDefault();
-    },
-    
-    drag(e) {
-        if (!this.isDragging) return;
-        
-        const map = Utils.$('#village-map');
-        const content = Utils.$('#village-map-content');
-        if (!map || !content) return;
-        
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        const deltaX = clientX - this.startX;
-        const deltaY = clientY - this.startY;
-        
-        let newLeft = this.scrollLeft + deltaX;
-        let newTop = this.scrollTop + deltaY;
-        
-        // Calcular límites
-        const mapRect = map.getBoundingClientRect();
-        const contentRect = content.getBoundingClientRect();
-        
-        const maxLeft = 50; // Margen de límite
-        const minLeft = mapRect.width - contentRect.width - 50;
-        const maxTop = 50;
-        const minTop = mapRect.height - contentRect.height - 50;
-        
-        // Aplicar límites
-        newLeft = Math.min(maxLeft, Math.max(minLeft, newLeft));
-        newTop = Math.min(maxTop, Math.max(minTop, newTop));
-        
-        content.style.left = newLeft + 'px';
-        content.style.top = newTop + 'px';
-        
-        if (e.preventDefault) e.preventDefault();
-    },
-    
-    endDrag() {
-        this.isDragging = false;
+        map.addEventListener('touchstart', startDrag, { passive: false });
+        document.addEventListener('touchmove', doDrag, { passive: false });
+        document.addEventListener('touchend', endDrag);
     },
     
     isUserActive(user) {

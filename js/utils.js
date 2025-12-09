@@ -60,6 +60,18 @@ const Utils = {
         return CONFIG.AVATARS[avatarKey] || '🧝';
     },
     
+    // Obtener nombre corto con inicial del apellido (ej: "Claudio B.")
+    getShortName(fullName) {
+        if (!fullName) return 'Usuario';
+        const parts = fullName.trim().split(/\s+/);
+        const firstName = parts[0];
+        if (parts.length > 1) {
+            const lastInitial = parts[parts.length - 1].charAt(0).toUpperCase();
+            return `${firstName} ${lastInitial}.`;
+        }
+        return firstName;
+    },
+    
     getPriceRangeLabel(key) {
         return CONFIG.PRICE_RANGES[key] || key;
     },

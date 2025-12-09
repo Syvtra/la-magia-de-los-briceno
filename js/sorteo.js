@@ -23,12 +23,12 @@ const Sorteo = {
         
         container.innerHTML = this.participants.map(user => {
             const avatar = Utils.getAvatarEmoji(user.avatar_url);
-            const firstName = user.name?.split(' ')[0] || 'Usuario';
+            const shortName = Utils.getShortName(user.name);
             
             return `
                 <div class="participant-item">
                     <div class="participant-avatar">${avatar}</div>
-                    <div class="participant-name">${Utils.sanitizeHTML(firstName)}</div>
+                    <div class="participant-name">${Utils.sanitizeHTML(shortName)}</div>
                 </div>
             `;
         }).join('');

@@ -2,13 +2,32 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#1a472a">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#d32f2f">
+    <meta name="msapplication-TileColor" content="#d32f2f">
+    <meta name="msapplication-TileImage" content="assets/icon-144.png">
+    
+    <!-- PWA iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>La Magia de los Briceño - Amigo Secreto</title>
+    <meta name="apple-mobile-web-app-title" content="Sorteo">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <link rel="apple-touch-icon" sizes="48x48" href="assets/icon-48.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/icon-72.png">
+    <link rel="apple-touch-icon" sizes="96x96" href="assets/icon-96.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="assets/icon-144.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png">
+    
+    <!-- Splash screens iOS -->
+    <meta name="apple-touch-startup-image" content="assets/icon-512.png">
+    
+    <title>Sorteo Familiar - Amigo Secreto</title>
+    <meta name="description" content="Aplicación de Amigo Secreto Navideño">
+    
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Mountains+of+Christmas:wght@400;700&display=swap" rel="stylesheet">
@@ -18,6 +37,38 @@
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/screens.css">
     <link rel="stylesheet" href="css/tutorial.css">
+    
+    <style>
+        /* Banner iOS - Solo visible en Safari iOS */
+        .ios-install-banner {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+            color: white;
+            padding: 12px 16px;
+            z-index: 10000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+            font-family: 'Nunito', sans-serif;
+        }
+        .ios-install-banner.show { display: flex; align-items: center; gap: 12px; }
+        .ios-install-banner .banner-icon { font-size: 2rem; }
+        .ios-install-banner .banner-text { flex: 1; }
+        .ios-install-banner .banner-text strong { display: block; font-size: 0.95rem; }
+        .ios-install-banner .banner-text span { font-size: 0.8rem; opacity: 0.9; }
+        .ios-install-banner .banner-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -265,9 +316,27 @@
 
                     <div class="profile-card">
                         <div class="profile-avatar" id="profile-avatar">🧝</div>
+                        <button class="btn-change-avatar" id="btn-change-avatar">Cambiar avatar</button>
                         <h2 class="profile-name" id="profile-name">Usuario</h2>
                         <p class="profile-nickname" id="profile-nickname">@apodo</p>
                         <p class="profile-email" id="profile-email">correo@ejemplo.com</p>
+                    </div>
+
+                    <div class="avatar-selector-modal hidden" id="avatar-selector-modal">
+                        <div class="avatar-selector-content">
+                            <h3>Elige tu nuevo avatar</h3>
+                            <div class="avatar-grid-profile" id="avatar-grid-profile">
+                                <button type="button" class="avatar-option" data-avatar="elf">🧝</button>
+                                <button type="button" class="avatar-option" data-avatar="santa">🎅</button>
+                                <button type="button" class="avatar-option" data-avatar="mrs-claus">🤶</button>
+                                <button type="button" class="avatar-option" data-avatar="snowman">⛄</button>
+                                <button type="button" class="avatar-option" data-avatar="reindeer">🦌</button>
+                                <button type="button" class="avatar-option" data-avatar="angel">👼</button>
+                                <button type="button" class="avatar-option" data-avatar="gingerbread">🍪</button>
+                                <button type="button" class="avatar-option" data-avatar="tree">🎄</button>
+                            </div>
+                            <button class="btn btn-secondary btn-block" id="btn-cancel-avatar">Cancelar</button>
+                        </div>
                     </div>
 
                     <div class="profile-stats">
@@ -351,12 +420,11 @@
                         <h1>🗺️ Aldea Navideña</h1>
                     </header>
                     <div class="village-map" id="village-map">
+                        <div class="village-ground"></div>
                         <div class="village-map-content" id="village-map-content">
-                            <div class="village-ground"></div>
                             <div class="village-houses-full" id="village-houses-full"></div>
                         </div>
                     </div>
-                    <p class="village-hint">👆 Arrastra para explorar la aldea</p>
                     <div class="village-legend">
                         <div class="legend-item">
                             <span class="house-lit"></span>
@@ -501,6 +569,16 @@
         <div id="toast-container"></div>
     </div>
 
+    <!-- Banner iOS para instalar PWA -->
+    <div id="ios-install-banner" class="ios-install-banner">
+        <span class="banner-icon">🎄</span>
+        <div class="banner-text">
+            <strong>Instala Sorteo Familiar</strong>
+            <span>Toca <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M8 0a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 12.293V.5A.5.5 0 0 1 8 0z'/%3E%3Cpath d='M1 14.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5z'/%3E%3C/svg%3E" alt="compartir" style="vertical-align:middle;margin:0 2px;"> y "Agregar a Inicio"</span>
+        </div>
+        <button class="banner-close" id="ios-banner-close">×</button>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/config.js"></script>
     <script src="js/supabase-client.js"></script>
@@ -514,6 +592,29 @@
     <script src="js/notifications.js"></script>
     <script src="js/tutorial.js"></script>
     <script src="js/app.js"></script>
+    
+    <script>
+    (function() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isStandalone = window.navigator.standalone === true;
+        const dismissed = localStorage.getItem('ios_banner_dismissed');
+        
+        if (isIOS && !isStandalone && !dismissed) {
+            setTimeout(() => {
+                const banner = document.getElementById('ios-install-banner');
+                if (banner) banner.classList.add('show');
+            }, 3000);
+        }
+        
+        const closeBtn = document.getElementById('ios-banner-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                const banner = document.getElementById('ios-install-banner');
+                if (banner) banner.classList.remove('show');
+                localStorage.setItem('ios_banner_dismissed', 'true');
+            });
+        }
+    })();
+    </script>
 </body>
 </html>
-

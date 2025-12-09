@@ -553,14 +553,31 @@
 .profile-avatar {
     width: 100px;
     height: 100px;
-    margin: 0 auto var(--spacing-md);
-    background: linear-gradient(135deg, var(--color-red) 0%, var(--color-red-dark) 100%);
+    margin: 0 auto var(--spacing-sm);
+    background: linear-gradient(135deg, var(--color-green) 0%, var(--color-green-light) 100%);
     border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3rem;
     box-shadow: var(--shadow-lg);
+}
+
+.btn-change-avatar {
+    background: transparent;
+    border: 1px solid var(--color-gold);
+    color: var(--color-gold);
+    padding: 6px 16px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    cursor: pointer;
+    margin-bottom: var(--spacing-md);
+    transition: all var(--transition-fast);
+}
+
+.btn-change-avatar:hover {
+    background: var(--color-gold);
+    color: var(--color-green);
 }
 
 .profile-name {
@@ -628,12 +645,13 @@
 .village-map {
     background: linear-gradient(180deg, #0a1628 0%, #1a2a3a 50%, #2d4a5a 100%);
     border-radius: var(--radius-xl);
-    height: 400px;
+    min-height: 400px;
     position: relative;
     overflow: hidden;
     margin-bottom: var(--spacing-md);
     cursor: grab;
     touch-action: none;
+    user-select: none;
 }
 
 .village-map:active {
@@ -642,21 +660,34 @@
 
 .village-map-content {
     position: absolute;
-    min-width: 100%;
-    min-height: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: none;
 }
 
 .village-ground {
-    display: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.05));
+    pointer-events: none;
+    z-index: 0;
 }
 
 .village-houses-full {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 80px);
     gap: var(--spacing-lg);
-    padding: var(--spacing-xl);
-    width: 280px;
+    justify-content: center;
+    align-content: center;
 }
 
 .village-house {
@@ -716,13 +747,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.village-hint {
-    text-align: center;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-sm);
 }
 
 .village-legend {
@@ -890,4 +914,69 @@
     color: var(--text-primary);
     font-size: 1rem;
     margin-bottom: var(--spacing-md);
+}
+
+/* Avatar Selector Modal */
+.avatar-selector-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--spacing-md);
+}
+
+.avatar-selector-modal.hidden {
+    display: none;
+}
+
+.avatar-selector-content {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+}
+
+.avatar-selector-content h3 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    font-size: 1.1rem;
+}
+
+.avatar-grid-profile {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.avatar-grid-profile .avatar-option {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-lg);
+    border: 2px solid transparent;
+    background: var(--bg-secondary);
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-grid-profile .avatar-option:hover {
+    border-color: var(--color-gold);
+    transform: scale(1.1);
+}
+
+.avatar-grid-profile .avatar-option.selected {
+    border-color: var(--color-green);
+    background: rgba(45, 90, 61, 0.2);
 }

@@ -332,10 +332,8 @@ window.addEventListener('beforeunload', () => {
     // Cleanup si es necesario
 });
 
-// Service Worker - desactivado para APKs (puede causar problemas)
-// Solo registrar en navegadores web normales
+// Service Worker - compatible con iOS Safari y Android Chrome
 function isWebBrowser() {
-    // Detectar si estamos en un WebView de APK
     const userAgent = navigator.userAgent.toLowerCase();
     const isWebView = userAgent.includes('wv') || 
                       userAgent.includes('webview') ||
@@ -348,9 +346,37 @@ if ('serviceWorker' in navigator && isWebBrowser()) {
         navigator.serviceWorker.register('./sw.js')
             .then(registration => {
                 console.log('SW registered:', registration.scope);
+                
+                // Verificar actualizaciones cada 60 segundos
+                setInterval(() => {
+                    registration.update();
+                }, 60000);
+                
+                // Detectar nueva versión disponible
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // Nueva versión disponible
+                            if (confirm('Nueva versión disponible. ¿Actualizar ahora?')) {
+                                newWorker.postMessage('skipWaiting');
+                                window.location.reload();
+                            }
+                        }
+                    });
+                });
             })
             .catch(error => {
                 console.log('SW registration failed:', error);
             });
+    });
+    
+    // Recargar cuando el SW tome control
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+        }
     });
 }
