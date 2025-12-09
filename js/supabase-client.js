@@ -306,32 +306,5 @@ const db = {
                 table: 'pairs'
             }, callback)
             .subscribe();
-    },
-    
-    // Mensajes de admin a usuarios
-    async sendAdminMessage(userId, message, fromNickname) {
-        const { error } = await supabase
-            .from('users')
-            .update({
-                admin_message: message,
-                admin_message_from: fromNickname
-            })
-            .eq('id', userId);
-        
-        if (error) throw error;
-        return true;
-    },
-    
-    async clearAdminMessage(userId) {
-        const { error } = await supabase
-            .from('users')
-            .update({
-                admin_message: null,
-                admin_message_from: null
-            })
-            .eq('id', userId);
-        
-        if (error) throw error;
-        return true;
     }
 };
