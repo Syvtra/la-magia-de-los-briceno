@@ -87,6 +87,9 @@ async function initApp() {
                     addHelpButton();
                 }
                 
+                // Verificar si hay mensaje de admin pendiente
+                await checkAdminMessage();
+                
                 // Verificar si hay sorteo pendiente de mostrar
                 await checkPendingSorteo();
                 
@@ -179,19 +182,39 @@ function subscribeToRealtimeUpdates() {
     });
     
     // Suscribirse a cambios en usuarios (nuevos registros, actualizaciones)
-    db.subscribeToUsers((payload) => {
+    db.subscribeToUsers(async (payload) => {
         console.log('Realtime: users changed', payload.eventType);
         
         // Si es mi propio perfil, actualizar UI
         if (payload.new && Auth.currentUser && payload.new.id === Auth.currentUser.id) {
+            const oldProfile = Auth.userProfile;
             Auth.userProfile = payload.new;
             Auth.updateUI();
+            
+            // Verificar si hay un mensaje de admin nuevo (que no tenía antes)
+            const hadMessage = oldProfile?.admin_message;
+            const hasMessage = payload.new.admin_message;
+            
+            if (!hadMessage && hasMessage) {
+                // ¡Nuevo mensaje de admin! Mostrarlo en tiempo real
+                showAdminMessageAlert(payload.new.admin_message, payload.new.admin_message_from);
+                
+                // Limpiar el mensaje de la base de datos
+                try {
+                    await db.clearAdminMessage(Auth.currentUser.id);
+                    Auth.userProfile.admin_message = null;
+                    Auth.userProfile.admin_message_from = null;
+                } catch (error) {
+                    console.error('Error clearing admin message:', error);
+                }
+            }
         }
         
-        // Actualizar aldea y admin si está visible
-        if (typeof Village !== 'undefined') {
-            Village.loadUsers();
+        // Actualizar aldea si está visible
+        if (typeof Village !== 'undefined' && typeof Village.render === 'function') {
+            Village.render();
         }
+        // Actualizar admin si está visible
         if (Auth.isAdmin() && typeof Admin !== 'undefined') {
             Admin.loadData();
         }
@@ -298,6 +321,84 @@ function showSorteoAlert() {
     alert.addEventListener('click', (e) => {
         if (e.target === alert) {
             markAsSeen();
+            alert.classList.remove('active');
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }
+    });
+}
+
+// Verificar si hay mensaje de admin pendiente
+async function checkAdminMessage() {
+    if (!Auth.currentUser) return;
+    
+    try {
+        // Recargar perfil fresco desde la base de datos
+        const freshProfile = await db.getUser(Auth.currentUser.id);
+        console.log('Checking admin message, fresh profile:', freshProfile);
+        
+        const message = freshProfile?.admin_message;
+        const fromNickname = freshProfile?.admin_message_from;
+        
+        if (message) {
+            console.log('Admin message found:', message, 'from:', fromNickname);
+            // Mostrar el mensaje
+            showAdminMessageAlert(message, fromNickname);
+            
+            // Limpiar el mensaje de la base de datos
+            try {
+                await db.clearAdminMessage(Auth.currentUser.id);
+                Auth.userProfile.admin_message = null;
+                Auth.userProfile.admin_message_from = null;
+            } catch (error) {
+                console.error('Error clearing admin message:', error);
+            }
+        } else {
+            console.log('No admin message pending');
+        }
+    } catch (error) {
+        console.error('Error checking admin message:', error);
+    }
+}
+
+// Mostrar alerta de mensaje de admin
+function showAdminMessageAlert(message, fromNickname) {
+    const alertHTML = `
+        <div id="admin-message-alert" class="admin-message-alert">
+            <div class="admin-message-content">
+                <div class="admin-message-icon">💬</div>
+                <h2>Mensaje del Admin</h2>
+                <p class="admin-message-from">De: @${Utils.sanitizeHTML(fromNickname || 'Admin')}</p>
+                <div class="admin-message-text">${Utils.sanitizeHTML(message)}</div>
+                <button class="btn btn-primary btn-block" id="btn-close-admin-msg">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', alertHTML);
+    
+    const alert = document.getElementById('admin-message-alert');
+    const btnClose = document.getElementById('btn-close-admin-msg');
+    
+    // Animar entrada
+    setTimeout(() => {
+        alert.classList.add('active');
+    }, 100);
+    
+    // Cerrar al hacer click en el botón
+    btnClose.addEventListener('click', () => {
+        alert.classList.remove('active');
+        setTimeout(() => {
+            alert.remove();
+        }, 300);
+    });
+    
+    // Cerrar al hacer click fuera
+    alert.addEventListener('click', (e) => {
+        if (e.target === alert) {
             alert.classList.remove('active');
             setTimeout(() => {
                 alert.remove();

@@ -29,18 +29,64 @@ const Admin = {
         
         container.innerHTML = this.users.map(user => {
             const avatar = Utils.getAvatarEmoji(user.avatar_url);
+            const hasPendingMsg = user.admin_message ? '💬' : '';
             
             return `
                 <div class="admin-user-item" data-user-id="${user.id}">
                     <div class="admin-user-avatar">${avatar}</div>
                     <div class="admin-user-info">
-                        <h4>${Utils.sanitizeHTML(user.name)}</h4>
+                        <h4>${Utils.sanitizeHTML(user.name)} ${hasPendingMsg}</h4>
                         <p>@${Utils.sanitizeHTML(user.nickname)}</p>
                     </div>
                     ${user.is_admin ? '<span class="admin-user-badge">Admin</span>' : ''}
                 </div>
             `;
         }).join('');
+        
+        // Poblar select de mensaje directo
+        this.populateUserSelect();
+    },
+    
+    populateUserSelect() {
+        const select = Utils.$('#dm-user');
+        if (!select) return;
+        
+        const options = this.users
+            .filter(u => !u.is_admin) // No mostrar admins
+            .map(u => `<option value="${u.id}">${Utils.sanitizeHTML(u.name)} (@${u.nickname})</option>`)
+            .join('');
+        
+        select.innerHTML = '<option value="">Seleccionar usuario...</option>' + options;
+    },
+    
+    async sendDirectMessage(userId, message) {
+        if (!userId || !message) {
+            showToast('Selecciona un usuario y escribe un mensaje', 'error');
+            return;
+        }
+        
+        try {
+            const adminNickname = Auth.userProfile?.nickname || 'Admin';
+            console.log('Sending message to:', userId, 'Message:', message, 'From:', adminNickname);
+            
+            await db.sendAdminMessage(userId, message, adminNickname);
+            console.log('Message sent successfully');
+            
+            // Recargar usuarios para mostrar el indicador
+            this.users = await db.getAllUsers();
+            console.log('Users reloaded, checking for admin_message:', this.users.find(u => u.id === userId));
+            this.renderUsers();
+            
+            showToast('Mensaje enviado', 'success');
+            
+            // Limpiar formulario
+            Utils.$('#dm-user').value = '';
+            Utils.$('#dm-message').value = '';
+            
+        } catch (error) {
+            console.error('Error sending direct message:', error);
+            showToast('Error al enviar mensaje', 'error');
+        }
     },
     
     renderPairs() {
@@ -289,6 +335,17 @@ function initAdminEvents() {
             const title = Utils.$('#notif-title').value;
             const message = Utils.$('#notif-message').value;
             await Admin.sendNotification(title, message);
+        });
+    }
+    
+    // Formulario de mensaje directo
+    const dmForm = Utils.$('#direct-message-form');
+    if (dmForm) {
+        dmForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = Utils.$('#dm-user').value;
+            const message = Utils.$('#dm-message').value;
+            await Admin.sendDirectMessage(userId, message);
         });
     }
     
