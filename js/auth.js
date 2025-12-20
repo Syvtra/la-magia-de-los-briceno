@@ -17,14 +17,69 @@ const Auth = {
             
             if (type === 'recovery' && accessToken) {
                 // Usuario llegó desde el enlace de recuperación
-                console.log('🔐 Token de recuperación detectado - mostrando pantalla reset');
+                console.log('🔐 Token de recuperación detectado');
                 
-                // Limpiar la URL sin recargar
+                // Verificar si hay una contraseña pendiente en localStorage
+                const pendingReset = localStorage.getItem('pending_password_reset');
+                
+                if (pendingReset) {
+                    try {
+                        const resetData = JSON.parse(pendingReset);
+                        const { email, newPassword, timestamp } = resetData;
+                        
+                        // Verificar que no haya expirado (24 horas)
+                        const hoursSinceRequest = (Date.now() - timestamp) / (1000 * 60 * 60);
+                        
+                        if (hoursSinceRequest < 24) {
+                            console.log('🔐 Aplicando nueva contraseña automáticamente...');
+                            
+                            // Actualizar la contraseña usando el token de recuperación
+                            const { error: updateError } = await supabase.auth.updateUser({
+                                password: newPassword
+                            });
+                            
+                            if (!updateError) {
+                                // Contraseña actualizada exitosamente
+                                localStorage.removeItem('pending_password_reset');
+                                
+                                // Limpiar la URL
+                                window.history.replaceState({}, document.title, window.location.pathname);
+                                
+                                // Obtener la sesión actual
+                                const { data: { session } } = await supabase.auth.getSession();
+                                
+                                if (session) {
+                                    this.currentUser = session.user;
+                                    await this.loadUserProfile();
+                                    
+                                    showToast('¡Contraseña actualizada exitosamente!', 'success');
+                                    
+                                    // Redirigir al home
+                                    setTimeout(() => {
+                                        Navigation.showScreen('home');
+                                    }, 500);
+                                    
+                                    return true;
+                                }
+                            } else {
+                                console.error('Error al actualizar contraseña:', updateError);
+                                localStorage.removeItem('pending_password_reset');
+                            }
+                        } else {
+                            // Expiró la solicitud
+                            localStorage.removeItem('pending_password_reset');
+                            showToast('La solicitud de cambio expiró. Intenta de nuevo.', 'error');
+                        }
+                    } catch (e) {
+                        console.error('Error procesando reset:', e);
+                        localStorage.removeItem('pending_password_reset');
+                    }
+                }
+                
+                // Si no hay contraseña pendiente o hubo error, mostrar pantalla de reset manual
                 window.history.replaceState({}, document.title, window.location.pathname);
                 
-                // Configurar listener para cambios de auth
                 supabase.auth.onAuthStateChange(async (event, session) => {
-                    console.log('Auth event:', event);
                     if (event === 'SIGNED_OUT') {
                         this.currentUser = null;
                         this.userProfile = null;
@@ -32,7 +87,6 @@ const Auth = {
                     }
                 });
                 
-                // Mostrar pantalla de reset y NO continuar con el flujo normal
                 setTimeout(() => {
                     Navigation.showScreen('reset-password');
                 }, 100);
@@ -171,21 +225,48 @@ const Auth = {
         this.userProfile = null;
     },
     
-    async requestPasswordReset(email) {
+    async resetPasswordDirectly(email, newPassword) {
         if (!supabase || !supabase.auth) {
             throw new Error('No se pudo conectar con el servidor');
         }
         
-        // Usar la URL de producción si está configurada, sino usar la URL actual
-        const redirectUrl = CONFIG.PRODUCTION_URL && CONFIG.PRODUCTION_URL !== 'https://tuusuario.github.io/la-magia-de-los-briceno'
-            ? CONFIG.PRODUCTION_URL
-            : window.location.origin;
+        // Verificar que el usuario existe en la tabla users
+        const { data: users, error: checkError } = await supabase
+            .from('users')
+            .select('id, email, name, nickname, avatar_url')
+            .eq('email', email)
+            .limit(1);
         
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: redirectUrl
+        if (checkError || !users || users.length === 0) {
+            throw new Error('No existe una cuenta con ese correo electrónico');
+        }
+        
+        const userProfile = users[0];
+        
+        // SOLUCIÓN SIMPLE PARA APP FAMILIAR:
+        // Guardar la solicitud de reset en localStorage
+        // Luego enviar email de Supabase que al hacer clic automáticamente usa la nueva contraseña
+        localStorage.setItem('pending_password_reset', JSON.stringify({
+            email: email,
+            newPassword: newPassword,
+            timestamp: Date.now()
+        }));
+        
+        // Enviar email de recuperación de Supabase
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin
         });
         
-        if (error) throw error;
+        if (resetError) {
+            localStorage.removeItem('pending_password_reset');
+            throw new Error('Error al enviar email: ' + resetError.message);
+        }
+        
+        return { 
+            success: true, 
+            message: '¡Revisa tu correo! Haz clic en el enlace para completar el cambio',
+            emailSent: true
+        };
     },
     
     async updatePassword(newPassword) {
@@ -333,25 +414,45 @@ function initAuthForms() {
             e.preventDefault();
             
             const email = Utils.$('#forgot-email').value;
+            const newPassword = Utils.$('#forgot-new-password').value;
+            const confirmPassword = Utils.$('#forgot-confirm-password').value;
             const submitBtn = forgotPasswordForm.querySelector('button[type="submit"]');
             
+            // Validar que las contraseñas coincidan
+            if (newPassword !== confirmPassword) {
+                showToast('Las contraseñas no coinciden', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showToast('La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+            
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span>Enviando...</span>';
+            submitBtn.innerHTML = '<span>Restableciendo...</span>';
             
             try {
-                await Auth.requestPasswordReset(email);
-                showToast('¡Enlace enviado! Revisa tu correo', 'success');
-                forgotPasswordForm.reset();
+                const result = await Auth.resetPasswordDirectly(email, newPassword);
                 
-                // Volver al login después de 2 segundos
-                setTimeout(() => {
+                if (result.emailSent) {
+                    showToast(result.message, 'success');
+                    forgotPasswordForm.reset();
+                    
+                    // Volver al login después de 3 segundos
+                    setTimeout(() => {
+                        Navigation.showScreen('login');
+                    }, 3000);
+                } else {
+                    showToast('Contraseña restablecida exitosamente', 'success');
+                    forgotPasswordForm.reset();
                     Navigation.showScreen('login');
-                }, 2000);
+                }
             } catch (error) {
-                showToast(error.message || 'Error al enviar enlace', 'error');
+                showToast(error.message || 'Error al restablecer contraseña', 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span>Enviar enlace</span><span class="btn-glow"></span>';
+                submitBtn.innerHTML = '<span>Restablecer contraseña</span><span class="btn-glow"></span>';
             }
         });
     }

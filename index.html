@@ -131,8 +131,8 @@
                         <div class="auth-decoration">
                             <span class="star">🔑</span>
                         </div>
-                        <h1>Recuperar Contraseña</h1>
-                        <p>Ingresa tu correo y te enviaremos un enlace de recuperación</p>
+                        <h1>Restablecer Contraseña</h1>
+                        <p>Ingresa tu correo y tu nueva contraseña</p>
                     </div>
                     <form id="forgot-password-form" class="auth-form">
                         <div class="input-group">
@@ -140,8 +140,18 @@
                             <input type="email" id="forgot-email" placeholder="tu@correo.com" required>
                             <span class="input-icon">✉</span>
                         </div>
+                        <div class="input-group">
+                            <label for="forgot-new-password">Nueva contraseña</label>
+                            <input type="password" id="forgot-new-password" placeholder="Mínimo 6 caracteres" required minlength="6">
+                            <span class="input-icon">🔒</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="forgot-confirm-password">Confirmar contraseña</label>
+                            <input type="password" id="forgot-confirm-password" placeholder="Repite la contraseña" required minlength="6">
+                            <span class="input-icon">🔒</span>
+                        </div>
                         <button type="submit" class="btn btn-primary btn-block">
-                            <span>Enviar enlace</span>
+                            <span>Restablecer contraseña</span>
                             <span class="btn-glow"></span>
                         </button>
                     </form>
