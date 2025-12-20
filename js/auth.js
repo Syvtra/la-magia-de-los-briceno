@@ -176,8 +176,13 @@ const Auth = {
             throw new Error('No se pudo conectar con el servidor');
         }
         
+        // Usar la URL de producción si está configurada, sino usar la URL actual
+        const redirectUrl = CONFIG.PRODUCTION_URL && CONFIG.PRODUCTION_URL !== 'https://tuusuario.github.io/la-magia-de-los-briceno'
+            ? CONFIG.PRODUCTION_URL
+            : window.location.origin;
+        
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin
+            redirectTo: redirectUrl
         });
         
         if (error) throw error;
