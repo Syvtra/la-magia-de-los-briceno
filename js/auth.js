@@ -377,9 +377,15 @@ function initAuthForms() {
                 showToast('¡Contraseña actualizada exitosamente!', 'success');
                 resetPasswordForm.reset();
                 
-                // Redirigir al login después de 1.5 segundos
-                setTimeout(() => {
+                // Cerrar sesión y redirigir al login
+                setTimeout(async () => {
+                    try {
+                        await Auth.logout();
+                    } catch (e) {
+                        console.log('Logout after password reset:', e);
+                    }
                     Navigation.showScreen('login');
+                    showToast('Inicia sesión con tu nueva contraseña', 'info');
                 }, 1500);
             } catch (error) {
                 showToast(error.message || 'Error al actualizar contraseña', 'error');

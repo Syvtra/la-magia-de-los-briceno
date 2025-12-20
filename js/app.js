@@ -79,6 +79,10 @@ async function initApp() {
     
     await loadGlobalSettings();
     
+    // Verificar si es un flujo de recuperación de contraseña ANTES de inicializar Auth
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const isPasswordRecovery = hashParams.get('type') === 'recovery';
+    
     let isLoggedIn = false;
     try {
         isLoggedIn = await Auth.init();
@@ -89,6 +93,12 @@ async function initApp() {
     // Mostrar pantalla después del splash
     setTimeout(async () => {
         try {
+            // Si es recuperación de contraseña, mostrar esa pantalla sin importar el estado de login
+            if (isPasswordRecovery) {
+                Navigation.showScreen('reset-password');
+                return;
+            }
+            
             if (isLoggedIn) {
                 Navigation.showScreen('home');
                 subscribeToRealtimeUpdates();
