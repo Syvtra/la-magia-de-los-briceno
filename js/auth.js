@@ -10,17 +10,33 @@ const Auth = {
         }
         
         try {
-            // Verificar si hay un hash de recuperación de contraseña en la URL
+            // IMPORTANTE: Verificar PRIMERO si hay token de recuperación ANTES de verificar sesión
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
             const accessToken = hashParams.get('access_token');
             const type = hashParams.get('type');
             
             if (type === 'recovery' && accessToken) {
                 // Usuario llegó desde el enlace de recuperación
-                console.log('🔐 Token de recuperación detectado');
-                Navigation.showScreen('reset-password');
+                console.log('🔐 Token de recuperación detectado - mostrando pantalla reset');
+                
                 // Limpiar la URL sin recargar
                 window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Configurar listener para cambios de auth
+                supabase.auth.onAuthStateChange(async (event, session) => {
+                    console.log('Auth event:', event);
+                    if (event === 'SIGNED_OUT') {
+                        this.currentUser = null;
+                        this.userProfile = null;
+                        Navigation.showScreen('login');
+                    }
+                });
+                
+                // Mostrar pantalla de reset y NO continuar con el flujo normal
+                setTimeout(() => {
+                    Navigation.showScreen('reset-password');
+                }, 100);
+                
                 return false;
             }
             
@@ -44,6 +60,7 @@ const Auth = {
                     Navigation.showScreen('login');
                 } else if (event === 'PASSWORD_RECOVERY') {
                     // Supabase detectó recuperación de contraseña
+                    console.log('🔐 PASSWORD_RECOVERY event');
                     Navigation.showScreen('reset-password');
                 }
             });
