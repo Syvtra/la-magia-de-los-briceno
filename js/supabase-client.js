@@ -3,18 +3,17 @@ let supabase = null;
 function initSupabase() {
     if (typeof CONFIG === 'undefined') {
         console.error('CONFIG not defined');
-        return null;
+        throw new Error('CONFIG not defined');
     }
     
     if (CONFIG.SUPABASE_URL === 'TU_SUPABASE_URL') {
-        console.warn('Configura las credenciales de Supabase en js/config.js');
-        return null;
+        console.error('Configura las credenciales de Supabase en js/config.js');
+        throw new Error('Supabase credentials not configured');
     }
     
-    // Verificar que la librería de Supabase esté cargada
     if (typeof window.supabase === 'undefined') {
-        console.error('Supabase library not loaded');
-        return null;
+        console.error('Supabase library not loaded - check CDN connection');
+        throw new Error('Supabase library not loaded');
     }
     
     try {
@@ -25,11 +24,16 @@ function initSupabase() {
                 storage: window.localStorage
             }
         });
-        console.log('Supabase initialized successfully');
+        
+        if (!supabase || !supabase.auth) {
+            throw new Error('Supabase client creation failed');
+        }
+        
+        console.log('✅ Supabase initialized successfully');
         return supabase;
     } catch (error) {
-        console.error('Error initializing Supabase:', error);
-        return null;
+        console.error('❌ Error initializing Supabase:', error);
+        throw error;
     }
 }
 

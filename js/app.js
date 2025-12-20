@@ -35,7 +35,19 @@ async function initApp() {
     try {
         initSupabase();
     } catch (e) {
-        console.error('Supabase init error:', e);
+        console.error('❌ Supabase init error:', e);
+        
+        setTimeout(() => {
+            const splash = document.getElementById('screen-splash');
+            if (splash) splash.classList.remove('active');
+            
+            const login = document.getElementById('screen-login');
+            if (login) login.classList.add('active');
+            
+            showToast('Error de conexión: ' + e.message, 'error');
+        }, 1000);
+        
+        return;
     }
     
     try {

@@ -3,12 +3,27 @@ const Auth = {
     userProfile: null,
     
     async init() {
-        if (typeof supabase === 'undefined' || !supabase) {
-            console.error('Supabase not initialized');
+        if (typeof supabase === 'undefined' || !supabase || !supabase.auth) {
+            console.error('❌ Supabase not initialized properly');
+            showToast('Error: No se pudo conectar con el servidor', 'error');
             return false;
         }
         
         try {
+            // Verificar si hay un hash de recuperación de contraseña en la URL
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const accessToken = hashParams.get('access_token');
+            const type = hashParams.get('type');
+            
+            if (type === 'recovery' && accessToken) {
+                // Usuario llegó desde el enlace de recuperación
+                console.log('🔐 Token de recuperación detectado');
+                Navigation.showScreen('reset-password');
+                // Limpiar la URL sin recargar
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return false;
+            }
+            
             const { data: { session } } = await supabase.auth.getSession();
             
             if (session) {
@@ -27,6 +42,9 @@ const Auth = {
                     this.currentUser = null;
                     this.userProfile = null;
                     Navigation.showScreen('login');
+                } else if (event === 'PASSWORD_RECOVERY') {
+                    // Supabase detectó recuperación de contraseña
+                    Navigation.showScreen('reset-password');
                 }
             });
             
@@ -49,6 +67,10 @@ const Auth = {
     },
     
     async login(email, password) {
+        if (!supabase || !supabase.auth) {
+            throw new Error('No se pudo conectar con el servidor');
+        }
+        
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password
@@ -66,6 +88,10 @@ const Auth = {
     },
     
     async register(userData) {
+        if (!supabase || !supabase.auth) {
+            throw new Error('No se pudo conectar con el servidor');
+        }
+        
         const { email, password, name, nickname, avatar } = userData;
         
         const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -117,11 +143,39 @@ const Auth = {
     },
     
     async logout() {
+        if (!supabase || !supabase.auth) {
+            throw new Error('No se pudo conectar con el servidor');
+        }
+        
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
         
         this.currentUser = null;
         this.userProfile = null;
+    },
+    
+    async requestPasswordReset(email) {
+        if (!supabase || !supabase.auth) {
+            throw new Error('No se pudo conectar con el servidor');
+        }
+        
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin
+        });
+        
+        if (error) throw error;
+    },
+    
+    async updatePassword(newPassword) {
+        if (!supabase || !supabase.auth) {
+            throw new Error('No se pudo conectar con el servidor');
+        }
+        
+        const { error } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+        
+        if (error) throw error;
     },
     
     async updateProfile(updates) {
@@ -171,6 +225,8 @@ const Auth = {
 function initAuthForms() {
     const loginForm = Utils.$('#login-form');
     const registerForm = Utils.$('#register-form');
+    const forgotPasswordForm = Utils.$('#forgot-password-form');
+    const resetPasswordForm = Utils.$('#reset-password-form');
     const logoutBtn = Utils.$('#btn-logout');
     const avatarGrid = Utils.$('#avatar-grid');
     
@@ -247,6 +303,73 @@ function initAuthForms() {
             selectedAvatar = option.dataset.avatar;
             
             Effects.playSound('click');
+        });
+    }
+    
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = Utils.$('#forgot-email').value;
+            const submitBtn = forgotPasswordForm.querySelector('button[type="submit"]');
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Enviando...</span>';
+            
+            try {
+                await Auth.requestPasswordReset(email);
+                showToast('¡Enlace enviado! Revisa tu correo', 'success');
+                forgotPasswordForm.reset();
+                
+                // Volver al login después de 2 segundos
+                setTimeout(() => {
+                    Navigation.showScreen('login');
+                }, 2000);
+            } catch (error) {
+                showToast(error.message || 'Error al enviar enlace', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Enviar enlace</span><span class="btn-glow"></span>';
+            }
+        });
+    }
+    
+    if (resetPasswordForm) {
+        resetPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newPassword = Utils.$('#new-password').value;
+            const confirmPassword = Utils.$('#confirm-password').value;
+            const submitBtn = resetPasswordForm.querySelector('button[type="submit"]');
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Las contraseñas no coinciden', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showToast('La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Actualizando...</span>';
+            
+            try {
+                await Auth.updatePassword(newPassword);
+                showToast('¡Contraseña actualizada exitosamente!', 'success');
+                resetPasswordForm.reset();
+                
+                // Redirigir al login después de 1.5 segundos
+                setTimeout(() => {
+                    Navigation.showScreen('login');
+                }, 1500);
+            } catch (error) {
+                showToast(error.message || 'Error al actualizar contraseña', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Actualizar contraseña</span><span class="btn-glow"></span>';
+            }
         });
     }
     
