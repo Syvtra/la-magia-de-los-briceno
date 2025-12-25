@@ -73,6 +73,10 @@ async function initApp() {
     
     try {
         Effects.init();
+        // Inicializar contador de Navidad
+        if (typeof ChristmasCountdown !== 'undefined') {
+            ChristmasCountdown.init();
+        }
     } catch (e) {
         console.error('Effects init error:', e);
     }
@@ -109,8 +113,18 @@ async function initApp() {
                     addHelpButton();
                 }
                 
+                // Inicializar juego de adivinanzas
+                if (typeof GuessingGame !== 'undefined') {
+                    await GuessingGame.init();
+                }
+                
                 // Verificar si hay sorteo pendiente de mostrar
                 await checkPendingSorteo();
+                
+                // Mostrar notificaciones pendientes del admin
+                if (typeof Notifications !== 'undefined') {
+                    await Notifications.showPendingNotifications();
+                }
                 
             } else {
                 Navigation.showScreen('login');
@@ -239,6 +253,24 @@ function subscribeToRealtimeUpdates() {
         console.log('Realtime: pairs changed', payload.eventType);
         if (Auth.isAdmin() && typeof Admin !== 'undefined') {
             Admin.loadData();
+        }
+    });
+
+    // Suscribirse a cambios en el estado del juego de adivinanzas
+    db.subscribeToGameState(async (payload) => {
+        console.log('Realtime: game state changed', payload.eventType);
+        if (typeof GuessingGame !== 'undefined') {
+            await GuessingGame.loadGameState();
+            GuessingGame.updateUI();
+        }
+    });
+
+    // Suscribirse a cambios en los turnos del juego
+    db.subscribeToGameTurns(async (payload) => {
+        console.log('Realtime: game turns changed', payload.eventType);
+        if (typeof GuessingGame !== 'undefined') {
+            await GuessingGame.loadGameState();
+            GuessingGame.updateUI();
         }
     });
 }

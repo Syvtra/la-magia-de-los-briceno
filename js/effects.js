@@ -244,3 +244,155 @@ function initEffectControls() {
         });
     }
 }
+
+// =====================================================
+// CHRISTMAS COUNTDOWN - Contador para Navidad
+// =====================================================
+
+const ChristmasCountdown = {
+    intervalId: null,
+    
+    // Inicializar el contador
+    init() {
+        this.update();
+        // Actualizar cada segundo
+        this.intervalId = setInterval(() => this.update(), 1000);
+    },
+    
+    // Detener el contador
+    stop() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+        }
+    },
+    
+    // Obtener la fecha de Navidad en zona horaria de Chile
+    getChristmasDate() {
+        const now = new Date();
+        // Obtener el año actual en Chile
+        const chileTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+        let year = chileTime.getFullYear();
+        
+        // Si ya pasó Navidad este año, usar el próximo año
+        const christmas = new Date(year, 11, 25, 0, 0, 0); // 25 de diciembre a las 00:00
+        if (chileTime > christmas) {
+            year++;
+        }
+        
+        return new Date(year, 11, 25, 0, 0, 0);
+    },
+    
+    // Obtener el inicio de diciembre para calcular el progreso
+    getDecemberStart() {
+        const now = new Date();
+        const chileTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+        let year = chileTime.getFullYear();
+        
+        // Si estamos después del 25 de diciembre, usar el próximo año
+        const christmas = new Date(year, 11, 25, 0, 0, 0);
+        if (chileTime > christmas) {
+            year++;
+        }
+        
+        return new Date(year, 11, 1, 0, 0, 0); // 1 de diciembre a las 00:00
+    },
+    
+    // Calcular el tiempo restante
+    getTimeRemaining() {
+        const now = new Date();
+        // Convertir a hora de Chile
+        const chileNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+        const christmas = this.getChristmasDate();
+        
+        const diff = christmas - chileNow;
+        
+        if (diff <= 0) {
+            return { days: 0, hours: 0, minutes: 0, seconds: 0, arrived: true };
+        }
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        return { days, hours, minutes, seconds, arrived: false };
+    },
+    
+    // Calcular el progreso del trineo (0% a 100%)
+    getProgress() {
+        const now = new Date();
+        const chileNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+        const decemberStart = this.getDecemberStart();
+        const christmas = this.getChristmasDate();
+        
+        // Si es antes de diciembre, progreso es 0
+        if (chileNow < decemberStart) {
+            return 0;
+        }
+        
+        // Si ya es Navidad, progreso es 100
+        if (chileNow >= christmas) {
+            return 100;
+        }
+        
+        // Calcular progreso entre 1 y 25 de diciembre
+        const totalTime = christmas - decemberStart;
+        const elapsedTime = chileNow - decemberStart;
+        
+        return Math.min(100, Math.max(0, (elapsedTime / totalTime) * 100));
+    },
+    
+    // Actualizar la UI
+    update() {
+        const countdownText = Utils.$('#countdown-text');
+        const sleighContainer = Utils.$('#sleigh-container');
+        const trackProgress = Utils.$('#track-progress');
+        const arrivedMessage = Utils.$('#countdown-arrived');
+        
+        if (!countdownText) return;
+        
+        const time = this.getTimeRemaining();
+        const progress = this.getProgress();
+        
+        if (time.arrived) {
+            // ¡Ya llegó Navidad!
+            countdownText.textContent = '¡Feliz Navidad!';
+            if (arrivedMessage) {
+                arrivedMessage.classList.remove('hidden');
+            }
+            if (sleighContainer) {
+                sleighContainer.style.setProperty('--sleigh-position', '85%');
+            }
+            if (trackProgress) {
+                trackProgress.style.setProperty('--progress', '100%');
+            }
+        } else {
+            // Mostrar cuenta regresiva
+            let text = 'Faltan ';
+            
+            if (time.days > 0) {
+                text += `${time.days} día${time.days !== 1 ? 's' : ''}, `;
+            }
+            text += `${time.hours}h ${time.minutes}m ${time.seconds}s`;
+            text += ' para Navidad';
+            
+            countdownText.textContent = text;
+            
+            if (arrivedMessage) {
+                arrivedMessage.classList.add('hidden');
+            }
+            
+            // Actualizar posición del trineo (5% a 85% del contenedor)
+            const sleighPosition = 5 + (progress * 0.8);
+            if (sleighContainer) {
+                sleighContainer.style.setProperty('--sleigh-position', `${sleighPosition}%`);
+            }
+            
+            // Actualizar barra de progreso
+            if (trackProgress) {
+                trackProgress.style.setProperty('--progress', `${progress}%`);
+            }
+        }
+    }
+};

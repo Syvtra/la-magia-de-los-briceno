@@ -12,6 +12,11 @@ const Sorteo = {
             this.assignment = await db.getAssignment(Auth.currentUser.id);
             this.updateStatus();
             
+            // Actualizar UI del juego de adivinanzas si está disponible
+            if (typeof GuessingGame !== 'undefined') {
+                GuessingGame.updateUI();
+            }
+            
         } catch (error) {
             console.error('Error loading sorteo data:', error);
         }

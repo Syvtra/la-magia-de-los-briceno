@@ -253,15 +253,151 @@
                         </div>
                     </header>
 
-                    <div class="spirit-meter">
-                        <div class="spirit-header">
-                            <span class="spirit-icon">✨</span>
-                            <span class="spirit-title">Espíritu Navideño</span>
-                            <span class="spirit-level" id="spirit-level">0%</span>
+                    <div class="christmas-countdown">
+                        <div class="countdown-header">
+                            <span class="countdown-icon">🎅</span>
+                            <span class="countdown-text" id="countdown-text">Calculando...</span>
                         </div>
-                        <div class="spirit-bar">
-                            <div class="spirit-fill" id="spirit-fill"></div>
-                            <div class="spirit-glow"></div>
+                        <div class="sleigh-track">
+                            <div class="track-sky">
+                                <div class="star star-1"></div>
+                                <div class="star star-2"></div>
+                                <div class="star star-3"></div>
+                                <div class="star star-4"></div>
+                                <div class="star star-5"></div>
+                                <div class="star star-6"></div>
+                                <div class="star star-7"></div>
+                                <div class="star star-8"></div>
+                                <div class="star star-9"></div>
+                                <div class="shooting-star"></div>
+                            </div>
+                            <div class="track-ground">
+                                <div class="snow-ground"></div>
+                                <div class="sleigh-container" id="sleigh-container">
+                                    <!-- SVG Trineo 3D con Viejito Pascuero -->
+                                    <svg class="sleigh-svg" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+                                        <!-- Renos (silueta) -->
+                                        <g class="reindeer">
+                                            <ellipse cx="15" cy="52" rx="8" ry="5" fill="#8B4513"/>
+                                            <circle cx="10" cy="48" r="4" fill="#8B4513"/>
+                                            <path d="M8 44 L5 38 M8 44 L11 38" stroke="#654321" stroke-width="1.5" fill="none"/>
+                                            <ellipse cx="15" cy="57" rx="1" ry="3" fill="#654321"/>
+                                            <ellipse cx="18" cy="57" rx="1" ry="3" fill="#654321"/>
+                                            <circle cx="8" cy="47" r="1" fill="#ff0000"/>
+                                        </g>
+                                        <!-- Cuerda/Riendas -->
+                                        <path d="M23 52 Q35 48 45 55" stroke="#8B4513" stroke-width="1.5" fill="none" class="reins"/>
+                                        <!-- Trineo base 3D -->
+                                        <defs>
+                                            <linearGradient id="sleighGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                <stop offset="0%" style="stop-color:#c41e3a;stop-opacity:1" />
+                                                <stop offset="50%" style="stop-color:#8b0000;stop-opacity:1" />
+                                                <stop offset="100%" style="stop-color:#5c0000;stop-opacity:1" />
+                                            </linearGradient>
+                                            <linearGradient id="goldTrim" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+                                                <stop offset="50%" style="stop-color:#daa520;stop-opacity:1" />
+                                                <stop offset="100%" style="stop-color:#b8860b;stop-opacity:1" />
+                                            </linearGradient>
+                                            <filter id="sleighShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                                <feDropShadow dx="2" dy="3" stdDeviation="2" flood-opacity="0.4"/>
+                                            </filter>
+                                        </defs>
+                                        <!-- Cuerpo del trineo -->
+                                        <g filter="url(#sleighShadow)">
+                                            <path d="M45 45 L95 45 Q100 45 100 50 L100 60 Q100 65 95 68 L50 68 Q45 68 42 65 L40 55 Q40 48 45 45" fill="url(#sleighGradient)"/>
+                                            <!-- Borde dorado superior -->
+                                            <path d="M45 45 L95 45 Q100 45 100 48" stroke="url(#goldTrim)" stroke-width="3" fill="none"/>
+                                            <!-- Decoración dorada -->
+                                            <ellipse cx="70" cy="56" rx="12" ry="6" fill="none" stroke="url(#goldTrim)" stroke-width="2"/>
+                                            <circle cx="70" cy="56" r="3" fill="url(#goldTrim)"/>
+                                        </g>
+                                        <!-- Patines del trineo -->
+                                        <g class="sleigh-runners">
+                                            <path d="M38 70 Q35 70 35 73 L35 75 Q35 77 40 77 L98 77 Q103 77 105 74 Q107 71 103 70" fill="url(#goldTrim)" filter="url(#sleighShadow)"/>
+                                            <path d="M40 72 L100 72" stroke="#b8860b" stroke-width="1"/>
+                                        </g>
+                                        <!-- Santa Claus 3D -->
+                                        <g class="santa-figure">
+                                            <!-- Saco de regalos -->
+                                            <ellipse cx="85" cy="42" rx="10" ry="12" fill="#8B4513"/>
+                                            <path d="M78 35 Q85 30 92 35" stroke="#654321" stroke-width="2" fill="none"/>
+                                            <!-- Cuerpo de Santa -->
+                                            <ellipse cx="65" cy="38" rx="12" ry="14" fill="#c41e3a"/>
+                                            <!-- Cinturón -->
+                                            <rect x="53" y="42" width="24" height="4" fill="#1a1a1a"/>
+                                            <rect x="62" y="41" width="6" height="6" rx="1" fill="url(#goldTrim)"/>
+                                            <!-- Brazos -->
+                                            <ellipse cx="52" cy="35" rx="4" ry="6" fill="#c41e3a"/>
+                                            <ellipse cx="78" cy="35" rx="4" ry="6" fill="#c41e3a"/>
+                                            <!-- Manos (guantes) -->
+                                            <circle cx="50" cy="38" r="3" fill="#f5f5dc"/>
+                                            <circle cx="80" cy="38" r="3" fill="#f5f5dc"/>
+                                            <!-- Cabeza -->
+                                            <circle cx="65" cy="20" r="10" fill="#ffdbac"/>
+                                            <!-- Barba -->
+                                            <ellipse cx="65" cy="28" rx="8" ry="6" fill="#ffffff"/>
+                                            <ellipse cx="65" cy="25" rx="6" ry="4" fill="#ffffff"/>
+                                            <!-- Cara -->
+                                            <circle cx="61" cy="18" r="1.5" fill="#2c1810"/>
+                                            <circle cx="69" cy="18" r="1.5" fill="#2c1810"/>
+                                            <ellipse cx="65" cy="22" rx="2" ry="1" fill="#ffb6c1"/>
+                                            <path d="M62 25 Q65 27 68 25" stroke="#cc8080" stroke-width="0.5" fill="none"/>
+                                            <!-- Gorro -->
+                                            <path d="M55 18 Q55 8 65 5 Q75 8 75 18" fill="#c41e3a"/>
+                                            <ellipse cx="65" cy="18" rx="12" ry="3" fill="#ffffff"/>
+                                            <circle cx="65" cy="3" r="4" fill="#ffffff"/>
+                                            <!-- Mejillas rosadas -->
+                                            <circle cx="58" cy="21" r="2" fill="#ffb6c1" opacity="0.6"/>
+                                            <circle cx="72" cy="21" r="2" fill="#ffb6c1" opacity="0.6"/>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <div class="destination-house">
+                                    <!-- Casa de destino SVG -->
+                                    <svg class="house-svg" viewBox="0 0 50 60" xmlns="http://www.w3.org/2000/svg">
+                                        <defs>
+                                            <linearGradient id="roofGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+                                                <stop offset="100%" style="stop-color:#5c3317;stop-opacity:1" />
+                                            </linearGradient>
+                                            <linearGradient id="houseGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" style="stop-color:#deb887;stop-opacity:1" />
+                                                <stop offset="100%" style="stop-color:#d2a679;stop-opacity:1" />
+                                            </linearGradient>
+                                        </defs>
+                                        <!-- Nieve en el techo -->
+                                        <path d="M0 25 L25 5 L50 25" fill="#ffffff" opacity="0.9"/>
+                                        <!-- Techo -->
+                                        <path d="M2 27 L25 8 L48 27" fill="url(#roofGradient)"/>
+                                        <!-- Casa -->
+                                        <rect x="5" y="27" width="40" height="30" fill="url(#houseGradient)"/>
+                                        <!-- Puerta -->
+                                        <rect x="18" y="40" width="14" height="17" fill="#5c3317" rx="2"/>
+                                        <circle cx="29" cy="50" r="1.5" fill="#ffd700"/>
+                                        <!-- Ventana con luz -->
+                                        <rect x="10" y="32" width="8" height="8" fill="#fff9c4"/>
+                                        <rect x="32" y="32" width="8" height="8" fill="#fff9c4"/>
+                                        <path d="M10 36 L18 36 M14 32 L14 40" stroke="#5c3317" stroke-width="1"/>
+                                        <path d="M32 36 L40 36 M36 32 L36 40" stroke="#5c3317" stroke-width="1"/>
+                                        <!-- Chimenea con humo -->
+                                        <rect x="35" y="10" width="8" height="15" fill="#8B4513"/>
+                                        <rect x="34" y="8" width="10" height="3" fill="#5c3317"/>
+                                        <g class="chimney-smoke">
+                                            <circle cx="39" cy="5" r="2" fill="#ccc" opacity="0.6"/>
+                                            <circle cx="41" cy="2" r="1.5" fill="#ccc" opacity="0.4"/>
+                                            <circle cx="38" cy="-1" r="1" fill="#ccc" opacity="0.2"/>
+                                        </g>
+                                        <!-- Corona navideña en puerta -->
+                                        <circle cx="25" cy="43" r="3" fill="#228b22" stroke="#8b0000" stroke-width="1"/>
+                                        <circle cx="25" cy="41" r="1" fill="#ff0000"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="track-progress" id="track-progress"></div>
+                        </div>
+                        <div class="countdown-arrived hidden" id="countdown-arrived">
+                            🎄 ¡Ya llegó Navidad! 🎄
                         </div>
                     </div>
 
@@ -334,6 +470,9 @@
                             <button class="btn btn-secondary" data-action="view-wishlist-friend">
                                 Ver su lista de deseos
                             </button>
+                            
+                            <!-- Contenedor para botón de iniciar juego -->
+                            <div id="game-start-container" class="game-start-container"></div>
                         </div>
                     </div>
 
@@ -539,7 +678,21 @@
                     </div>
 
                     <div class="admin-section">
-                        <h3>🎨 Tema Visual</h3>
+                        <h3>� Juego de Adivinanzas</h3>
+                        <p class="admin-hint">El juego se activa automáticamente el 25 de diciembre (Chile)</p>
+                        <div id="admin-game-status" class="admin-game-status"></div>
+                        <div class="sorteo-controls">
+                            <button class="btn btn-christmas btn-block" id="btn-admin-start-game">
+                                🎄 Iniciar Juego Ahora
+                            </button>
+                            <button class="btn btn-danger btn-block" id="btn-admin-reset-game">
+                                🔄 Reiniciar Juego
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h3>�🎨 Tema Visual</h3>
                         <div class="theme-controls">
                             <div class="setting-item">
                                 <span class="setting-label">❄️ Nieve global</span>
@@ -603,6 +756,19 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Pantalla del Juego de Adivinanzas -->
+            <section id="screen-guessing-game" class="screen">
+                <div class="screen-scroll">
+                    <header class="screen-header">
+                        <button class="btn-back" data-navigate="sorteo">←</button>
+                        <h1>🎄 Juego de Adivinanzas</h1>
+                    </header>
+                    <div id="guessing-game-content" class="guessing-game-content">
+                        <!-- Contenido dinámico del juego -->
+                    </div>
+                </div>
+            </section>
         </main>
 
         <nav id="navbar" class="navbar hidden">
@@ -653,6 +819,7 @@
     <script src="js/navigation.js"></script>
     <script src="js/wishlist.js"></script>
     <script src="js/sorteo.js"></script>
+    <script src="js/guessing-game.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/tutorial.js"></script>

@@ -142,6 +142,10 @@ const Navigation = {
             
             case 'sorteo':
                 Sorteo.loadData();
+                // Actualizar UI del juego de adivinanzas
+                if (typeof GuessingGame !== 'undefined') {
+                    GuessingGame.updateUI();
+                }
                 break;
             
             case 'wishlist':
@@ -158,6 +162,14 @@ const Navigation = {
             
             case 'map':
                 Village.render();
+                break;
+            
+            case 'guessing-game':
+                if (typeof GuessingGame !== 'undefined') {
+                    GuessingGame.loadGameState().then(() => {
+                        GuessingGame.updateGameScreen();
+                    });
+                }
                 break;
         }
     },

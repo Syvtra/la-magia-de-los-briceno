@@ -16,6 +16,7 @@ const Admin = {
             this.renderUsers();
             this.renderPairs();
             this.loadThemeSettings();
+            this.loadGameStatus();
             
         } catch (error) {
             console.error('Error loading admin data:', error);
@@ -242,6 +243,107 @@ const Admin = {
             console.error('Error sending notification:', error);
             showToast('Error al enviar notificación', 'error');
         }
+    },
+
+    // =====================================================
+    // FUNCIONES PARA JUEGO DE ADIVINANZAS (Admin)
+    // =====================================================
+
+    async loadGameStatus() {
+        const container = Utils.$('#admin-game-status');
+        if (!container) return;
+
+        try {
+            const gameState = await db.getGameState();
+            
+            if (!gameState) {
+                container.innerHTML = '<p class="game-status-text">⚪ Juego no inicializado</p>';
+            } else if (gameState.is_active) {
+                const currentIndex = gameState.current_turn_index + 1;
+                const total = gameState.turn_order?.length || 0;
+                container.innerHTML = `<p class="game-status-text">🟢 Juego activo - Turno ${currentIndex} de ${total}</p>`;
+            } else if (gameState.finished_at) {
+                container.innerHTML = '<p class="game-status-text">✅ Juego completado</p>';
+            } else {
+                container.innerHTML = '<p class="game-status-text">⚪ Juego no iniciado</p>';
+            }
+        } catch (error) {
+            console.error('Error loading game status:', error);
+            container.innerHTML = '<p class="game-status-text">❌ Error al cargar estado</p>';
+        }
+    },
+
+    async startGuessingGame() {
+        if (!confirm('¿Iniciar el juego de adivinanzas? Esto permitirá que todos los usuarios vean el juego activo.')) {
+            return;
+        }
+
+        const btn = Utils.$('#btn-admin-start-game');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '🎄 Iniciando...';
+        }
+
+        try {
+            // Obtener usuarios con asignaciones
+            const assignments = await db.getAllAssignments();
+            if (!assignments || assignments.length === 0) {
+                showToast('No hay participantes en el sorteo', 'error');
+                return;
+            }
+
+            // Crear orden aleatorio de turnos
+            const participantIds = assignments.map(a => a.giver_id);
+            const shuffledOrder = Utils.shuffleArray([...participantIds]);
+
+            // Iniciar juego
+            await db.startGame(shuffledOrder);
+            
+            showToast('🎄 ¡Juego de adivinanzas iniciado!', 'success');
+            Effects.playSound('reveal');
+            
+            // Actualizar estado
+            await this.loadGameStatus();
+
+            // Enviar notificación a todos
+            if (typeof Notifications !== 'undefined') {
+                Notifications.sendToAll(
+                    '🎄 ¡Juego de Adivinanzas!',
+                    'El juego ha comenzado. ¡Entra a ver quién está de turno!'
+                );
+            }
+
+        } catch (error) {
+            console.error('Error starting game:', error);
+            showToast('Error al iniciar el juego', 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '🎄 Iniciar Juego Ahora';
+            }
+        }
+    },
+
+    async resetGuessingGame() {
+        if (!confirm('¿Reiniciar el juego de adivinanzas? Esto eliminará todos los turnos completados.')) {
+            return;
+        }
+
+        try {
+            await db.resetGame();
+            showToast('Juego reiniciado', 'info');
+            await this.loadGameStatus();
+
+            // Actualizar UI del juego si está visible
+            if (typeof GuessingGame !== 'undefined') {
+                await GuessingGame.loadGameState();
+                GuessingGame.updateUI();
+            }
+
+        } catch (error) {
+            console.error('Error resetting game:', error);
+            showToast('Error al reiniciar el juego', 'error');
+        }
     }
 };
 
@@ -255,6 +357,10 @@ function initAdminEvents() {
     const adminSnow = Utils.$('#admin-snow');
     const adminLights = Utils.$('#admin-lights');
     const adminSounds = Utils.$('#admin-sounds');
+
+    // Botones del juego de adivinanzas
+    const startGameBtn = Utils.$('#btn-admin-start-game');
+    const resetGameBtn = Utils.$('#btn-admin-reset-game');
     
     if (addPairBtn) {
         addPairBtn.addEventListener('click', () => {
@@ -307,6 +413,19 @@ function initAdminEvents() {
     if (adminSounds) {
         adminSounds.addEventListener('change', (e) => {
             Admin.updateThemeSetting('sounds_enabled', e.target.checked);
+        });
+    }
+
+    // Event listeners para juego de adivinanzas
+    if (startGameBtn) {
+        startGameBtn.addEventListener('click', () => {
+            Admin.startGuessingGame();
+        });
+    }
+
+    if (resetGameBtn) {
+        resetGameBtn.addEventListener('click', () => {
+            Admin.resetGuessingGame();
         });
     }
 }

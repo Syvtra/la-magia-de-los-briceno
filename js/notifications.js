@@ -105,14 +105,95 @@ const Notifications = {
     },
     
     async sendToAll(title, body) {
-        // Mostrar notificación local a usuarios con la app abierta
-        this.showLocalNotification(title, body);
+        try {
+            // Guardar notificación en la base de datos para que todos la vean
+            await db.createAdminNotification(title, body);
+            console.log('Notificación guardada en BD:', title, body);
+            
+            // También mostrar notificación local a usuarios con la app abierta
+            this.showLocalNotification(title, body);
+            
+            return true;
+        } catch (error) {
+            console.error('Error guardando notificación:', error);
+            throw error;
+        }
+    },
+    
+    // Mostrar notificaciones pendientes al usuario
+    async showPendingNotifications() {
+        if (!Auth.currentUser) return;
         
-        // Por ahora solo notificaciones locales
-        // Las push notifications requieren Edge Function
-        console.log('Notificación enviada:', title, body);
-        
-        return true;
+        try {
+            const unread = await db.getUnreadNotifications(Auth.currentUser.id);
+            
+            if (unread && unread.length > 0) {
+                // Mostrar cada notificación no leída
+                for (const notif of unread) {
+                    await this.showNotificationModal(notif);
+                }
+            }
+        } catch (error) {
+            console.error('Error cargando notificaciones:', error);
+        }
+    },
+    
+    // Mostrar modal con la notificación
+    async showNotificationModal(notification) {
+        return new Promise((resolve) => {
+            const content = `
+                <div class="admin-notification-modal">
+                    <div class="notif-icon">📢</div>
+                    <h2>${Utils.sanitizeHTML(notification.title)}</h2>
+                    <p class="notif-message">${Utils.sanitizeHTML(notification.message)}</p>
+                    <p class="notif-date">${this.formatDate(notification.created_at)}</p>
+                    <button class="btn btn-primary btn-block" id="btn-mark-read">
+                        Entendido
+                    </button>
+                </div>
+            `;
+            
+            showModal(content);
+            
+            // Reproducir sonido
+            try { Effects.playSound('notification'); } catch(e) {}
+            
+            const btn = Utils.$('#btn-mark-read');
+            if (btn) {
+                btn.addEventListener('click', async () => {
+                    try {
+                        await db.markNotificationAsRead(notification.id, Auth.currentUser.id);
+                    } catch (e) {
+                        console.log('Error marking as read:', e);
+                    }
+                    hideModal();
+                    resolve();
+                });
+            }
+            
+            // También cerrar con el botón X del modal
+            const closeBtn = Utils.$('#modal-close');
+            if (closeBtn) {
+                const originalHandler = closeBtn.onclick;
+                closeBtn.onclick = async () => {
+                    try {
+                        await db.markNotificationAsRead(notification.id, Auth.currentUser.id);
+                    } catch (e) {}
+                    if (originalHandler) originalHandler();
+                    resolve();
+                };
+            }
+        });
+    },
+    
+    formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('es-CL', {
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     },
     
     urlBase64ToUint8Array(base64String) {
