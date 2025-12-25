@@ -138,50 +138,110 @@ const Notifications = {
         }
     },
     
-    // Mostrar modal con la notificación
+    // Mostrar tarjeta 3D Navideña sin overlay
     async showNotificationModal(notification) {
         return new Promise((resolve) => {
-            const content = `
-                <div class="admin-notification-modal">
-                    <div class="notif-icon">📢</div>
-                    <h2>${Utils.sanitizeHTML(notification.title)}</h2>
-                    <p class="notif-message">${Utils.sanitizeHTML(notification.message)}</p>
-                    <p class="notif-date">${this.formatDate(notification.created_at)}</p>
-                    <button class="btn btn-primary btn-block" id="btn-mark-read">
-                        Entendido
+            // Crear contenedor fullscreen para la tarjeta 3D
+            const cardOverlay = document.createElement('div');
+            cardOverlay.className = 'card-3d-fullscreen';
+            cardOverlay.id = 'card-3d-overlay';
+            
+            cardOverlay.innerHTML = `
+                <div class="card-3d-scene">
+                    <div class="christmas-card-3d" id="christmas-card">
+                        <!-- Frente de la tarjeta -->
+                        <div class="card-face-3d card-front-3d">
+                            <div class="card-border-glow"></div>
+                            <div class="card-inner">
+                                <div class="card-snow-effect"></div>
+                                <div class="card-header-3d">
+                                    <div class="card-ornaments-3d">
+                                        <span class="ornament-3d">🎄</span>
+                                        <span class="ornament-3d star">⭐</span>
+                                        <span class="ornament-3d">🎄</span>
+                                    </div>
+                                </div>
+                                <div class="card-ribbon-3d">
+                                    <span>📢 Mensaje Especial</span>
+                                </div>
+                                <div class="card-body-3d">
+                                    <h2 class="card-title-3d">${Utils.sanitizeHTML(notification.title)}</h2>
+                                    <div class="card-message-container">
+                                        <p class="card-message-3d">${Utils.sanitizeHTML(notification.message)}</p>
+                                    </div>
+                                    <p class="card-date-3d">🕐 ${this.formatDate(notification.created_at)}</p>
+                                </div>
+                                <div class="card-footer-3d">
+                                    <span>🎁</span><span>❄️</span><span>🎅</span><span>❄️</span><span>🎁</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Parte trasera de la tarjeta -->
+                        <div class="card-face-3d card-back-3d">
+                            <div class="card-border-glow"></div>
+                            <div class="card-inner">
+                                <div class="card-back-pattern-3d"></div>
+                                <div class="back-content-3d">
+                                    <div class="back-tree">🎄</div>
+                                    <h2 class="back-title-3d">La Magia de los Briceño</h2>
+                                    <div class="back-year">Navidad ${new Date().getFullYear()}</div>
+                                    <div class="back-santa">
+                                        <span>✨</span>
+                                        <span class="santa-icon">🎅</span>
+                                        <span>✨</span>
+                                    </div>
+                                    <p class="back-wish">¡Que la magia de la Navidad<br>llene tu hogar de amor y alegría!</p>
+                                </div>
+                                <div class="back-footer-3d">
+                                    <span>❄️</span><span>🦌</span><span>🛷</span><span>🦌</span><span>❄️</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="card-tap-hint">👆 Toca la tarjeta para girarla</p>
+                    <button class="btn-accept-3d" id="btn-mark-read-3d">
+                        <span>✨</span>
+                        <span>¡Entendido!</span>
+                        <span>✨</span>
                     </button>
                 </div>
             `;
             
-            showModal(content);
+            document.body.appendChild(cardOverlay);
+            
+            // Animar entrada
+            requestAnimationFrame(() => {
+                cardOverlay.classList.add('active');
+            });
             
             // Reproducir sonido
             try { Effects.playSound('notification'); } catch(e) {}
             
-            const btn = Utils.$('#btn-mark-read');
-            if (btn) {
-                btn.addEventListener('click', async () => {
-                    try {
-                        await db.markNotificationAsRead(notification.id, Auth.currentUser.id);
-                    } catch (e) {
-                        console.log('Error marking as read:', e);
-                    }
-                    hideModal();
-                    resolve();
+            // Evento para girar la tarjeta
+            const card = document.getElementById('christmas-card');
+            if (card) {
+                card.addEventListener('click', () => {
+                    card.classList.toggle('flipped');
                 });
             }
             
-            // También cerrar con el botón X del modal
-            const closeBtn = Utils.$('#modal-close');
-            if (closeBtn) {
-                const originalHandler = closeBtn.onclick;
-                closeBtn.onclick = async () => {
-                    try {
-                        await db.markNotificationAsRead(notification.id, Auth.currentUser.id);
-                    } catch (e) {}
-                    if (originalHandler) originalHandler();
+            // Cerrar y marcar como leída
+            const closeCard = async () => {
+                try {
+                    await db.markNotificationAsRead(notification.id, Auth.currentUser.id);
+                } catch (e) {
+                    console.log('Error marking as read:', e);
+                }
+                cardOverlay.classList.remove('active');
+                setTimeout(() => {
+                    cardOverlay.remove();
                     resolve();
-                };
+                }, 500);
+            };
+            
+            const btn = document.getElementById('btn-mark-read-3d');
+            if (btn) {
+                btn.addEventListener('click', closeCard);
             }
         });
     },
